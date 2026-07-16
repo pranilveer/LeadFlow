@@ -56,7 +56,7 @@ export default function Users() {
       logActivity("user", `User "${formData.name}" updated.`, session.username);
       showToast("User updated.", "success");
     } else {
-      const colors = ["#60A5FA", "#34D399", "#C084FC", "#FBBF24", "#F87171"];
+      const colors = ["var(--accent)", "var(--green)", "var(--purple)", "var(--amber)", "var(--red)"];
       allUsers.push({ ...formData, id: uid("usr"), password: formData.password, avatarColor: colors[allUsers.length % colors.length], createdAt: new Date().toISOString(), lastLogin: null });
       saveUsers(allUsers);
       logActivity("user", `User "${formData.name}" created.`, session.username);

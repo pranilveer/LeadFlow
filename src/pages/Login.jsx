@@ -4,9 +4,9 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 
 const DEMO_ACCOUNTS = [
-  { username: "Admin", password: "Admin@123", role: "Full access \u00b7 users & settings", color: "#60A5FA", initial: "A", avatarClass: "demo-account__avatar--admin" },
-  { username: "John", password: "John@123", role: "Standard user \u00b7 own leads", color: "#34D399", initial: "J", avatarClass: "demo-account__avatar--john" },
-  { username: "Sarah", password: "Sarah@123", role: "Standard user \u00b7 own leads", color: "#C084FC", initial: "S", avatarClass: "demo-account__avatar--sarah" },
+  { username: "Admin", password: "Admin@123", role: "Full access \u00b7 users & settings", color: "var(--accent)", initial: "A", avatarClass: "demo-account__avatar--admin" },
+  { username: "John", password: "John@123", role: "Standard user \u00b7 own leads", color: "var(--green)", initial: "J", avatarClass: "demo-account__avatar--john" },
+  { username: "Sarah", password: "Sarah@123", role: "Standard user \u00b7 own leads", color: "var(--purple)", initial: "S", avatarClass: "demo-account__avatar--sarah" },
 ];
 
 export default function Login() {

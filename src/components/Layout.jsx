@@ -7,6 +7,7 @@ export default function Layout({ activePage, children }) {
   const { session, logout, isAdmin } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -16,6 +17,14 @@ export default function Layout({ activePage, children }) {
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
   }, []);
+
+  const handleSidebarToggle = () => {
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(!sidebarOpen);
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed);
+    }
+  };
 
   useEffect(() => {
     if (sidebarOpen) document.body.classList.add("sidebar-open");
@@ -43,7 +52,7 @@ export default function Layout({ activePage, children }) {
   return (
     <div className="app-body light">
       <div className={`sidebar-overlay ${sidebarOpen ? "" : ""}`} onClick={() => setSidebarOpen(false)}></div>
-      <aside className={`sidebar ${sidebarOpen ? "" : ""}`} aria-label="Main navigation">
+      <aside className={`sidebar ${sidebarCollapsed ? "sidebar--collapsed" : ""}`} aria-label="Main navigation">
         <div className="sidebar__header">
           <NavLink className="brand" to="/dashboard">
             <span className="brand__mark"><i className="fa-solid fa-bolt"></i></span>
@@ -71,8 +80,8 @@ export default function Layout({ activePage, children }) {
 
       <div className="app-main">
         <header className="navbar">
-          <button type="button" className="btn btn--ghost btn--icon sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle sidebar">
-            <i className="fa-solid fa-bars"></i>
+          <button type="button" className="btn btn--ghost btn--icon sidebar-toggle" onClick={handleSidebarToggle} aria-label="Toggle sidebar">
+            <i className={`fa-solid ${sidebarCollapsed ? "fa-angles-right" : "fa-bars"}`}></i>
           </button>
 
           <div className="navbar__search">

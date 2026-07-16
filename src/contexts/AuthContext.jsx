@@ -1,23 +1,25 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { bootstrap, getSession, setSession as storeSession, clearSession as storeClearSession, authenticate as authUser, isAdmin as checkAdmin } from "../utils/storage";
-
-bootstrap();
+import { getSession, login as apiLogin, register as apiRegister, logout as apiLogout, isAdmin as checkAdmin } from "../utils/api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [session, setSessionState] = useState(() => getSession());
 
-  const login = useCallback((username, password, remember) => {
-    const user = authUser(username, password);
-    if (!user) return null;
-    const s = storeSession(user, remember);
+  const login = useCallback(async (username, password, remember) => {
+    const s = await apiLogin(username, password, remember);
     setSessionState(s);
     return s;
   }, []);
 
-  const logout = useCallback(() => {
-    storeClearSession();
+  const register = useCallback(async (username, password, name, email) => {
+    const s = await apiRegister(username, password, name, email);
+    setSessionState(s);
+    return s;
+  }, []);
+
+  const logout = useCallback(async () => {
+    await apiLogout();
     setSessionState(null);
   }, []);
 
@@ -25,14 +27,8 @@ export function AuthProvider({ children }) {
     setSessionState(getSession());
   }, []);
 
-  useEffect(() => {
-    if (!session) return;
-    const stored = getSession();
-    if (stored && stored.userId !== session.userId) setSessionState(stored);
-  }, [session]);
-
   return (
-    <AuthContext.Provider value={{ session, login, logout, refreshSession, isAdmin: checkAdmin(session) }}>
+    <AuthContext.Provider value={{ session, login, register, logout, refreshSession, isAdmin: checkAdmin(session) }}>
       {children}
     </AuthContext.Provider>
   );

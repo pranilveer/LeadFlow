@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LeadFlow CRM — Manage lead categories." />
+  <meta name="theme-color" content="#EEF1F6" />
+  <title>Categories — LeadFlow CRM</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="app-body light" data-page="categories">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="sidebar__header">
+      <a class="brand" href="dashboard.html">
+        <span class="brand__mark"><i class="fa-solid fa-bolt"></i></span>
+        <span class="brand__text"><span class="brand__name">LeadFlow</span><span class="brand__tag">CRM</span></span>
+      </a>
+    </div>
+    <nav class="sidebar-nav"></nav>
+    <div class="sidebar__footer">LeadFlow CRM v1.0</div>
+  </aside>
+
+  <div class="app-main">
+    <header class="navbar">
+      <button type="button" class="btn btn--ghost btn--icon sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar"><i class="fa-solid fa-bars"></i></button>
+      <div class="navbar__search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" id="globalSearch" placeholder="Search categories…" aria-label="Search" />
+      </div>
+      <div class="navbar__actions">
+        <button type="button" class="btn btn--ghost btn--icon" id="themeToggle" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="themeToggleIcon"></i></button>
+        <div class="user-menu">
+          <button type="button" class="user-menu__btn" id="userMenuBtn" aria-expanded="false">
+            <span class="user-avatar" id="navAvatar">A</span>
+            <span class="user-menu__info"><span class="user-menu__name" id="navUserName">User</span><span class="user-menu__role" id="navUserRole">Role</span></span>
+            <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;color:var(--text-faint)"></i>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown__header">
+              <span class="user-avatar" id="dropdownAvatar">A</span>
+              <div><div class="user-dropdown__name" id="dropdownName">User</div><div class="user-dropdown__email" id="dropdownEmail"></div></div>
+            </div>
+            <a href="profile.html" class="user-dropdown__link"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="settings.html" class="user-dropdown__link"><i class="fa-solid fa-gear"></i> Settings</a>
+            <button type="button" class="user-dropdown__link user-dropdown__link--danger" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Categories</h1>
+          <p class="page-subtitle">Organize leads with color-coded categories.</p>
+        </div>
+        <div class="page-header__actions">
+          <button type="button" class="btn btn--primary btn--sm" id="addCategoryBtn"><i class="fa-solid fa-plus"></i> Add Category</button>
+        </div>
+      </div>
+
+      <div class="category-grid" id="categoryGrid"></div>
+    </main>
+  </div>
+
+  <!-- Category Form Modal -->
+  <div class="modal" id="categoryModal" aria-hidden="true" role="dialog">
+    <div class="modal__backdrop" data-modal-close="categoryModal"></div>
+    <div class="modal__dialog modal__dialog--sm">
+      <div class="modal__header">
+        <h3 class="modal__title" id="categoryModalTitle">Add Category</h3>
+        <button type="button" class="modal__close" data-modal-close="categoryModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <form id="categoryForm" novalidate>
+          <input type="hidden" id="categoryEditId" value="" />
+          <div class="form-field">
+            <label class="form-label" for="categoryName">Name <span class="form-label__required">*</span></label>
+            <input class="form-input" type="text" id="categoryName" required placeholder="Category name" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="categoryDescription">Description</label>
+            <textarea class="form-textarea" id="categoryDescription" placeholder="Brief description…"></textarea>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Color</label>
+            <div class="color-picker-row" id="colorPicker">
+              <button type="button" class="color-swatch color-swatch--selected" data-color="#60A5FA" style="background:#60A5FA" aria-label="Blue"></button>
+              <button type="button" class="color-swatch" data-color="#34D399" style="background:#34D399" aria-label="Green"></button>
+              <button type="button" class="color-swatch" data-color="#FBBF24" style="background:#FBBF24" aria-label="Amber"></button>
+              <button type="button" class="color-swatch" data-color="#F87171" style="background:#F87171" aria-label="Red"></button>
+              <button type="button" class="color-swatch" data-color="#C084FC" style="background:#C084FC" aria-label="Purple"></button>
+              <button type="button" class="color-swatch" data-color="#9AA3B5" style="background:#9AA3B5" aria-label="Gray"></button>
+            </div>
+            <input type="hidden" id="categoryColor" value="#60A5FA" />
+          </div>
+        </form>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--ghost" data-modal-close="categoryModal">Cancel</button>
+        <button type="button" class="btn btn--primary" id="saveCategoryBtn"><i class="fa-solid fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Category Modal -->
+  <div class="modal" id="deleteCategoryModal" aria-hidden="true" role="dialog">
+    <div class="modal__backdrop" data-modal-close="deleteCategoryModal"></div>
+    <div class="modal__dialog modal__dialog--sm">
+      <div class="modal__header">
+        <h3 class="modal__title">Delete Category</h3>
+        <button type="button" class="modal__close" data-modal-close="deleteCategoryModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Delete <strong id="deleteCategoryName"></strong>? Leads using this category must be reassigned first.</p>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--ghost" data-modal-close="deleteCategoryModal">Cancel</button>
+        <button type="button" class="btn btn--danger" id="confirmDeleteCategoryBtn"><i class="fa-solid fa-trash"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="categories.js"></script>
+</body>
+</html>

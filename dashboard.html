@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LeadFlow CRM Dashboard — Manage leads, pipeline, and exports." />
+  <meta name="theme-color" content="#EEF1F6" />
+  <title>Dashboard — LeadFlow CRM</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="app-body light" data-page="dashboard">
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="sidebar__header">
+      <a class="brand" href="dashboard.html">
+        <span class="brand__mark"><i class="fa-solid fa-bolt"></i></span>
+        <span class="brand__text">
+          <span class="brand__name">LeadFlow</span>
+          <span class="brand__tag">CRM</span>
+        </span>
+      </a>
+    </div>
+    <nav class="sidebar-nav" aria-label="Sidebar links"></nav>
+    <div class="sidebar__footer">LeadFlow CRM v1.0</div>
+  </aside>
+
+  <div class="app-main">
+    <!-- Sticky Navbar -->
+    <header class="navbar">
+      <button type="button" class="btn btn--ghost btn--icon sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="navbar__search">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" id="globalSearch" placeholder="Search leads…" aria-label="Global search" />
+      </div>
+
+      <div class="navbar__actions">
+        <button type="button" class="btn btn--ghost btn--icon" id="themeToggle" aria-label="Toggle theme">
+          <i class="fa-solid fa-moon" id="themeToggleIcon"></i>
+        </button>
+
+        <div class="user-menu">
+          <button type="button" class="user-menu__btn" id="userMenuBtn" aria-expanded="false" aria-haspopup="true">
+            <span class="user-avatar" id="navAvatar">A</span>
+            <span class="user-menu__info">
+              <span class="user-menu__name" id="navUserName">User</span>
+              <span class="user-menu__role" id="navUserRole">Role</span>
+            </span>
+            <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;color:var(--text-faint)"></i>
+          </button>
+          <div class="user-dropdown" id="userDropdown" role="menu">
+            <div class="user-dropdown__header">
+              <span class="user-avatar" id="dropdownAvatar">A</span>
+              <div>
+                <div class="user-dropdown__name" id="dropdownName">User</div>
+                <div class="user-dropdown__email" id="dropdownEmail">email</div>
+              </div>
+            </div>
+            <a href="profile.html" class="user-dropdown__link" role="menuitem"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="settings.html" class="user-dropdown__link" role="menuitem"><i class="fa-solid fa-gear"></i> Settings</a>
+            <button type="button" class="user-dropdown__link user-dropdown__link--danger" id="logoutBtn" role="menuitem">
+              <i class="fa-solid fa-right-from-bracket"></i> Log out
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Overview of your lead pipeline and activity.</p>
+        </div>
+        <div class="page-header__actions">
+          <button type="button" class="btn btn--secondary btn--sm" id="importBtn">
+            <i class="fa-solid fa-file-import"></i> Import CSV
+          </button>
+          <button type="button" class="btn btn--secondary btn--sm" id="exportCsvBtn">
+            <i class="fa-solid fa-file-csv"></i> Export CSV
+          </button>
+          <button type="button" class="btn btn--secondary btn--sm" id="exportJsonBtn">
+            <i class="fa-solid fa-file-code"></i> Export JSON
+          </button>
+          <button type="button" class="btn btn--ghost btn--sm" id="printBtn">
+            <i class="fa-solid fa-print"></i> Print
+          </button>
+          <button type="button" class="btn btn--primary btn--sm" id="addLeadBtn">
+            <i class="fa-solid fa-plus"></i> Add Lead
+          </button>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--blue"><i class="fa-solid fa-users"></i></div>
+          <div>
+            <div class="stat-card__label">Total Leads</div>
+            <div class="stat-card__value" id="statTotalLeads">0</div>
+            <div class="stat-card__meta">All pipeline records</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--green"><i class="fa-solid fa-calendar-day"></i></div>
+          <div>
+            <div class="stat-card__label">Today's Leads</div>
+            <div class="stat-card__value" id="statTodayLeads">0</div>
+            <div class="stat-card__meta">Added today</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--purple"><i class="fa-solid fa-tags"></i></div>
+          <div>
+            <div class="stat-card__label">Categories</div>
+            <div class="stat-card__value" id="statCategories">0</div>
+            <div class="stat-card__meta">Active categories</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--amber"><i class="fa-solid fa-user-check"></i></div>
+          <div>
+            <div class="stat-card__label">My Leads</div>
+            <div class="stat-card__value" id="statMyLeads">0</div>
+            <div class="stat-card__meta">Assigned to you</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lead Form -->
+      <section class="panel-card collapsible" id="leadFormSection" style="margin-bottom:1.5rem">
+        <div class="panel-card__header collapsible__header" id="leadFormToggle" tabindex="0" role="button" aria-expanded="false">
+          <h2 class="panel-card__title"><i class="fa-solid fa-pen-to-square"></i> <span id="leadFormTitle">Add New Lead</span></h2>
+          <i class="fa-solid fa-chevron-down collapsible__icon"></i>
+        </div>
+        <div class="panel-card__body collapsible__body" id="leadFormBody">
+          <form id="leadForm" novalidate>
+            <input type="hidden" id="leadEditId" value="" />
+            <div class="form-grid form-grid--3">
+              <div class="form-field">
+                <label class="form-label" for="leadName">Lead Name <span class="form-label__required">*</span></label>
+                <input class="form-input" type="text" id="leadName" required placeholder="Full name" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="businessName">Business Name <span class="form-label__required">*</span></label>
+                <input class="form-input" type="text" id="businessName" required placeholder="Company name" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="email">Email <span class="form-label__required">*</span></label>
+                <input class="form-input" type="email" id="email" required placeholder="email@company.com" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="phone">Phone</label>
+                <input class="form-input" type="tel" id="phone" placeholder="+1 (555) 000-0000" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="website">Website</label>
+                <input class="form-input" type="url" id="website" placeholder="https://example.com" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="category">Category <span class="form-label__required">*</span></label>
+                <select class="form-select" id="category" required></select>
+              </div>
+              <div class="form-field" id="customCategoryField" hidden>
+                <label class="form-label" for="customCategory">Custom Category</label>
+                <input class="form-input" type="text" id="customCategory" placeholder="Enter custom category" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="city">City</label>
+                <input class="form-input" type="text" id="city" placeholder="City" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="state">State</label>
+                <input class="form-input" type="text" id="state" placeholder="State / Province" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="country">Country</label>
+                <input class="form-input" type="text" id="country" placeholder="Country" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="leadSource">Lead Source</label>
+                <select class="form-select" id="leadSource"></select>
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="leadStatus">Lead Status</label>
+                <select class="form-select" id="leadStatus"></select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="address">Address</label>
+              <input class="form-input" type="text" id="address" placeholder="Street address" />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="description">Description</label>
+              <textarea class="form-textarea" id="description" placeholder="Notes about this lead…"></textarea>
+            </div>
+            <div class="form-grid form-grid--2" id="autoFields" hidden>
+              <div class="form-field">
+                <label class="form-label">Lead ID</label>
+                <input class="form-input" type="text" id="displayLeadId" readonly />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Added By</label>
+                <input class="form-input" type="text" id="displayAddedBy" readonly />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Added Date</label>
+                <input class="form-input" type="text" id="displayAddedDate" readonly />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Added Time</label>
+                <input class="form-input" type="text" id="displayAddedTime" readonly />
+              </div>
+            </div>
+            <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
+              <button type="submit" class="btn btn--primary" id="leadFormSubmit">
+                <i class="fa-solid fa-check"></i> <span id="leadFormSubmitLabel">Save Lead</span>
+              </button>
+              <button type="button" class="btn btn--ghost" id="leadFormCancel" hidden>Cancel</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Lead Table -->
+      <section class="panel-card">
+        <div class="panel-card__header">
+          <h2 class="panel-card__title"><i class="fa-solid fa-table"></i> Leads</h2>
+        </div>
+        <div class="panel-card__body" style="padding:0">
+          <div class="table-toolbar" style="padding:1rem 1.35rem 0">
+            <div class="table-toolbar__search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="search" id="tableSearch" placeholder="Search leads…" aria-label="Search leads table" />
+            </div>
+            <select class="form-select" id="filterStatus" style="width:auto;min-width:140px" aria-label="Filter by status">
+              <option value="">All Statuses</option>
+            </select>
+            <select class="form-select" id="filterCategory" style="width:auto;min-width:140px" aria-label="Filter by category">
+              <option value="">All Categories</option>
+            </select>
+            <select class="form-select" id="filterOwner" style="width:auto;min-width:140px" aria-label="Filter by owner">
+              <option value="">All Owners</option>
+            </select>
+            <select class="form-select" id="pageSize" style="width:auto;min-width:100px" aria-label="Rows per page">
+              <option value="10">10 / page</option>
+              <option value="25">25 / page</option>
+              <option value="50">50 / page</option>
+            </select>
+          </div>
+          <div class="table-wrap" style="border:none;border-radius:0">
+            <table class="data-table" id="leadsTable" aria-label="Leads data grid">
+              <thead>
+                <tr>
+                  <th data-sort="id">Lead ID <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th data-sort="leadName">Name <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th data-sort="businessName">Business <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th data-sort="email">Email</th>
+                  <th data-sort="phone">Phone</th>
+                  <th data-sort="category">Category <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th data-sort="leadStatus">Status <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th data-sort="leadSource">Source</th>
+                  <th data-sort="addedBy">Added By</th>
+                  <th data-sort="addedDate">Date <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leadsTableBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination">
+            <span id="paginationInfo">Showing 0 of 0</span>
+            <div class="pagination__controls" id="paginationControls"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- View Lead Modal -->
+  <div class="modal" id="viewLeadModal" aria-hidden="true" role="dialog" aria-labelledby="viewLeadTitle">
+    <div class="modal__backdrop" data-modal-close="viewLeadModal"></div>
+    <div class="modal__dialog modal__dialog--lg">
+      <div class="modal__header">
+        <h3 class="modal__title" id="viewLeadTitle">Lead Details</h3>
+        <button type="button" class="modal__close" data-modal-close="viewLeadModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body" id="viewLeadBody"></div>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--secondary" data-modal-close="viewLeadModal">Close</button>
+        <button type="button" class="btn btn--primary" id="viewEditBtn"><i class="fa-solid fa-pen"></i> Edit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal" id="deleteModal" aria-hidden="true" role="dialog">
+    <div class="modal__backdrop" data-modal-close="deleteModal"></div>
+    <div class="modal__dialog modal__dialog--sm">
+      <div class="modal__header">
+        <h3 class="modal__title">Delete Lead</h3>
+        <button type="button" class="modal__close" data-modal-close="deleteModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Are you sure you want to delete <strong id="deleteLeadName"></strong>? This action cannot be undone.</p>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--ghost" data-modal-close="deleteModal">Cancel</button>
+        <button type="button" class="btn btn--danger" id="confirmDeleteBtn"><i class="fa-solid fa-trash"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal" id="importModal" aria-hidden="true" role="dialog">
+    <div class="modal__backdrop" data-modal-close="importModal"></div>
+    <div class="modal__dialog">
+      <div class="modal__header">
+        <h3 class="modal__title">Import Leads from CSV</h3>
+        <button type="button" class="modal__close" data-modal-close="importModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <div class="backup-zone" id="importDropZone">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <p>Drag &amp; drop a CSV file here, or <label for="importFileInput" style="color:var(--accent);cursor:pointer;font-weight:600">browse</label></p>
+          <p class="form-hint">Columns: Lead Name, Business Name, Email, Phone, Website, Category, etc.</p>
+          <input type="file" id="importFileInput" accept=".csv" hidden />
+        </div>
+        <div id="importPreview" hidden style="margin-top:1rem">
+          <p class="form-label">Preview: <span id="importCount">0</span> leads ready to import</p>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--ghost" data-modal-close="importModal">Cancel</button>
+        <button type="button" class="btn btn--primary" id="confirmImportBtn" disabled><i class="fa-solid fa-file-import"></i> Import</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

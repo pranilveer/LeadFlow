@@ -1,14 +1,16 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
-import { getUsers, saveUsers, getLeads, logActivity, escapeHtml, uid, isAdmin as checkAdmin } from "../utils/storage";
+import { getUsers, addUser, updateUser, deleteUser, escapeHtml } from "../utils/api";
 
 export default function Users() {
   const { session, isAdmin } = useAuth();
   const { showToast } = useToast();
   const [renderKey, setRenderKey] = useState(0);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState("");
@@ -17,68 +19,45 @@ export default function Users() {
 
   const refresh = useCallback(() => setRenderKey(k => k + 1), []);
 
-  const getLeadCount = (username) => getLeads().filter(l => l.addedBy === username).length;
+  useEffect(() => {
+    getUsers().then(data => { setUsers(data); setLoading(false); }).catch(err => { showToast(err.message, "error"); setLoading(false); });
+  }, [renderKey, showToast]);
 
-  const users = getUsers().filter(u => {
+  const filtered = users.filter(u => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return [u.username, u.name, u.email, u.role, u.department].join(" ").toLowerCase().includes(q);
   });
 
-  const openAdd = () => {
-    setEditId("");
-    setFormData({ username: "", password: "", name: "", email: "", phone: "", role: "user", title: "", department: "", bio: "" });
-    setModalOpen(true);
-  };
+  const openAdd = () => { setEditId(""); setFormData({ username: "", password: "", name: "", email: "", phone: "", role: "user", title: "", department: "", bio: "" }); setModalOpen(true); };
+  const openEdit = (u) => { setEditId(u._id || u.id); setFormData({ username: u.username, password: "", name: u.name, email: u.email || "", phone: u.phone || "", role: u.role, title: u.title || "", department: u.department || "", bio: u.bio || "" }); setModalOpen(true); };
 
-  const openEdit = (u) => {
-    setEditId(u.id);
-    setFormData({ username: u.username, password: "", name: u.name, email: u.email || "", phone: u.phone || "", role: u.role, title: u.title || "", department: u.department || "", bio: u.bio || "" });
-    setModalOpen(true);
-  };
-
-  const saveUser = () => {
+  const saveUser = async () => {
     if (!formData.username.trim() || !formData.name.trim()) { showToast("Username and full name are required.", "error"); return; }
     if (!editId && (!formData.password || formData.password.length < 6)) { showToast("Password must be at least 6 characters.", "error"); return; }
-
-    const allUsers = getUsers();
-    if (!editId && allUsers.some(u => u.username.toLowerCase() === formData.username.toLowerCase())) {
-      showToast("Username already exists.", "error");
-      return;
-    }
-
-    if (editId) {
-      const idx = allUsers.findIndex(u => u.id === editId);
-      if (idx === -1) return;
-      allUsers[idx] = { ...allUsers[idx], ...formData };
-      if (formData.password) allUsers[idx].password = formData.password;
-      saveUsers(allUsers);
-      logActivity("user", `User "${formData.name}" updated.`, session.username);
-      showToast("User updated.", "success");
-    } else {
-      const colors = ["var(--accent)", "var(--green)", "var(--purple)", "var(--amber)", "var(--red)"];
-      allUsers.push({ ...formData, id: uid("usr"), password: formData.password, avatarColor: colors[allUsers.length % colors.length], createdAt: new Date().toISOString(), lastLogin: null });
-      saveUsers(allUsers);
-      logActivity("user", `User "${formData.name}" created.`, session.username);
-      showToast("User created.", "success");
-    }
-    setModalOpen(false);
-    refresh();
+    try {
+      if (editId) {
+        const updates = { ...formData };
+        if (!updates.password) delete updates.password;
+        await updateUser(editId, updates);
+        showToast("User updated.", "success");
+      } else {
+        await addUser(formData);
+        showToast("User created.", "success");
+      }
+      setModalOpen(false);
+      refresh();
+    } catch (err) { showToast(err.message, "error"); }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return;
-    const allUsers = getUsers();
-    const user = allUsers.find(u => u.id === deleteTarget.id);
-    if (!user) return;
-    if (user.id === session.userId) { showToast("Cannot delete your own account.", "error"); return; }
-    const adminCount = allUsers.filter(u => u.role === "admin").length;
-    if (user.role === "admin" && adminCount <= 1) { showToast("Cannot delete the only administrator.", "error"); setDeleteTarget(null); return; }
-    saveUsers(allUsers.filter(u => u.id !== deleteTarget.id));
-    logActivity("user", `User "${user.name}" deleted.`, session.username);
-    showToast("User deleted.", "success");
-    setDeleteTarget(null);
-    refresh();
+    try {
+      await deleteUser(deleteTarget._id || deleteTarget.id);
+      showToast("User deleted.", "success");
+      setDeleteTarget(null);
+      refresh();
+    } catch (err) { showToast(err.message, "error"); }
   };
 
   return (
@@ -100,36 +79,40 @@ export default function Users() {
         </div>
       )}
 
-      <div className="user-grid">
-        {users.map(u => {
-          const isSelf = u.id === session.userId;
-          return (
-            <article key={u.id} className="user-card">
-              <div className="user-card__top">
-                <span className="user-card__avatar" style={{ background: u.avatarColor }}>{u.username.charAt(0).toUpperCase()}</span>
-                <div>
-                  <div className="user-card__name">{escapeHtml(u.name)} {u.role === "admin" && <span className="badge badge--accent">Admin</span>}</div>
-                  <div className="user-card__title">{escapeHtml(u.title || "\u2014")}</div>
+      {loading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "2rem", color: "var(--accent)" }}></i></div>
+      ) : (
+        <div className="user-grid">
+          {filtered.map(u => {
+            const isSelf = (u._id || u.id) === session.userId;
+            return (
+              <article key={u._id || u.id} className="user-card">
+                <div className="user-card__top">
+                  <span className="user-card__avatar" style={{ background: u.avatarColor }}>{u.username.charAt(0).toUpperCase()}</span>
+                  <div>
+                    <div className="user-card__name">{escapeHtml(u.name)} {u.role === "admin" && <span className="badge badge--accent">Admin</span>}</div>
+                    <div className="user-card__title">{escapeHtml(u.title || "\u2014")}</div>
+                  </div>
                 </div>
-              </div>
-              <div className="user-card__meta">
-                <div><i className="fa-solid fa-at"></i>{escapeHtml(u.username)}</div>
-                <div><i className="fa-solid fa-envelope"></i>{escapeHtml(u.email || "\u2014")}</div>
-                <div><i className="fa-solid fa-building"></i>{escapeHtml(u.department || "\u2014")}</div>
-                <div><i className="fa-solid fa-chart-line"></i>{getLeadCount(u.username)} leads</div>
-              </div>
-              <div className="category-card__actions">
-                <button type="button" className="btn btn--ghost btn--sm" onClick={() => openEdit(u)}><i className="fa-solid fa-pen"></i> Edit</button>
-                {!isSelf ? (
-                  <button type="button" className="btn btn--ghost btn--sm" style={{ color: "var(--red)" }} onClick={() => setDeleteTarget(u)}><i className="fa-solid fa-trash"></i> Delete</button>
-                ) : (
-                  <span className="badge badge--neutral">Current user</span>
-                )}
-              </div>
-            </article>
-          );
-        })}
-      </div>
+                <div className="user-card__meta">
+                  <div><i className="fa-solid fa-at"></i>{escapeHtml(u.username)}</div>
+                  <div><i className="fa-solid fa-envelope"></i>{escapeHtml(u.email || "\u2014")}</div>
+                  <div><i className="fa-solid fa-building"></i>{escapeHtml(u.department || "\u2014")}</div>
+                  <div><i className="fa-solid fa-chart-line"></i>{u.leadCount || 0} leads</div>
+                </div>
+                <div className="category-card__actions">
+                  <button type="button" className="btn btn--ghost btn--sm" onClick={() => openEdit(u)}><i className="fa-solid fa-pen"></i> Edit</button>
+                  {!isSelf ? (
+                    <button type="button" className="btn btn--ghost btn--sm" style={{ color: "var(--red)" }} onClick={() => setDeleteTarget(u)}><i className="fa-solid fa-trash"></i> Delete</button>
+                  ) : (
+                    <span className="badge badge--neutral">Current user</span>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? "Edit User" : "Add User"}
         footer={<>

@@ -3,49 +3,74 @@ import Layout from "../components/Layout";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import {
-  getCurrentUserRecord, updateUserProfile, getLeads, getActivities,
-  logActivity, formatDisplayDateTime, escapeHtml, animateCounter
-} from "../utils/storage";
+  getCurrentUser, updateProfile, getLeads, getActivities,
+  formatDisplayDateTime, escapeHtml, animateCounter
+} from "../utils/api";
 
 export default function Profile() {
   const { session, refreshSession } = useAuth();
   const { showToast } = useToast();
   const [renderKey, setRenderKey] = useState(0);
+  const [user, setUser] = useState(null);
+  const [leads, setLeads] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
   const leadCountRef = useRef(null);
   const wonCountRef = useRef(null);
 
-  const user = getCurrentUserRecord(session);
-  if (!user) return <Layout activePage="profile"><p>Unable to load profile.</p></Layout>;
+  useEffect(() => {
+    Promise.all([getCurrentUser(), getLeads(), getActivities()])
+      .then(([u, l, a]) => {
+        setUser(u);
+        setLeads(l);
+        setActivities(a.filter(act => act.user === u.username).slice(0, 15));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [renderKey]);
 
-  const myLeads = getLeads().filter(l => l.addedBy === user.username);
+  const myLeads = user ? leads.filter(l => l.addedBy === user.username) : [];
   const wonCount = myLeads.filter(l => l.leadStatus === "Won").length;
 
   const [form, setForm] = useState({
-    name: user.name || "", email: user.email || "", phone: user.phone || "",
-    department: user.department || "", title: user.title || "", bio: user.bio || "",
-    newPassword: "", confirmPassword: ""
+    name: "", email: "", phone: "", department: "", title: "", bio: "", newPassword: "", confirmPassword: ""
   });
+
+  useEffect(() => {
+    if (user) {
+      setForm({ name: user.name || "", email: user.email || "", phone: user.phone || "", department: user.department || "", title: user.title || "", bio: user.bio || "", newPassword: "", confirmPassword: "" });
+    }
+  }, [user]);
 
   useEffect(() => {
     if (leadCountRef.current) animateCounter(leadCountRef.current, myLeads.length);
     if (wonCountRef.current) animateCounter(wonCountRef.current, wonCount);
   }, [renderKey, myLeads.length, wonCount]);
 
-  const activities = getActivities().filter(a => a.user === user.username).slice(0, 15);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.newPassword && form.newPassword !== form.confirmPassword) { showToast("Passwords do not match.", "error"); return; }
     if (form.newPassword && form.newPassword.length < 6) { showToast("Password must be at least 6 characters.", "error"); return; }
-    const updates = { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), department: form.department.trim(), title: form.title.trim(), bio: form.bio.trim() };
-    if (form.newPassword) updates.password = form.newPassword;
-    updateUserProfile(user.id, updates);
-    logActivity("user", "Profile updated.", session.username);
-    showToast("Profile saved.", "success");
-    refreshSession();
-    setForm(f => ({ ...f, newPassword: "", confirmPassword: "" }));
-    setRenderKey(k => k + 1);
+    try {
+      const updates = { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), department: form.department.trim(), title: form.title.trim(), bio: form.bio.trim() };
+      if (form.newPassword) updates.password = form.newPassword;
+      await updateProfile(user._id || user.id, updates);
+      showToast("Profile saved.", "success");
+      refreshSession();
+      setForm(f => ({ ...f, newPassword: "", confirmPassword: "" }));
+      setRenderKey(k => k + 1);
+    } catch (err) { showToast(err.message, "error"); }
   };
+
+  if (loading) {
+    return (
+      <Layout activePage="profile">
+        <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "2rem", color: "var(--accent)" }}></i></div>
+      </Layout>
+    );
+  }
+
+  if (!user) return <Layout activePage="profile"><p>Unable to load profile.</p></Layout>;
 
   return (
     <Layout activePage="profile">
@@ -132,7 +157,7 @@ export default function Profile() {
             {activities.length === 0 ? (
               <div className="table-empty"><i className="fa-solid fa-clock"></i>No recent activity.</div>
             ) : activities.map(a => (
-              <div key={a.id} className="timeline__item">
+              <div key={a._id || a.id} className="timeline__item">
                 <span className="timeline__dot timeline__dot--system"><i className="fa-solid fa-circle"></i></span>
                 <div>
                   <div className="timeline__message">{escapeHtml(a.message)}</div>

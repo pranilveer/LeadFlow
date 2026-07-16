@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
-import { getCategories, addCategory, updateCategory, deleteCategory, escapeHtml, getLeads } from "../utils/storage";
+import { getCategories, addCategory, updateCategory, deleteCategory, escapeHtml } from "../utils/api";
 
 const SWATCHES = ["#60A5FA", "#34D399", "#FBBF24", "#F87171", "#C084FC", "#9AA3B5"];
 
@@ -11,6 +11,8 @@ export default function Categories() {
   const { session } = useAuth();
   const { showToast } = useToast();
   const [renderKey, setRenderKey] = useState(0);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState("");
@@ -21,44 +23,36 @@ export default function Categories() {
 
   const refresh = useCallback(() => setRenderKey(k => k + 1), []);
 
-  const categories = getCategories().filter(c => {
+  useEffect(() => {
+    getCategories().then(data => { setCategories(data); setLoading(false); }).catch(err => { showToast(err.message, "error"); setLoading(false); });
+  }, [renderKey, showToast]);
+
+  const filtered = categories.filter(c => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return c.name.toLowerCase().includes(q) || (c.description || "").toLowerCase().includes(q);
   });
 
-  const openAdd = () => {
-    setEditId("");
-    setName("");
-    setDescription("");
-    setSelectedColor("#60A5FA");
-    setModalOpen(true);
-  };
+  const openAdd = () => { setEditId(""); setName(""); setDescription(""); setSelectedColor("#60A5FA"); setModalOpen(true); };
+  const openEdit = (cat) => { setEditId(cat._id || cat.id); setName(cat.name); setDescription(cat.description || ""); setSelectedColor(cat.color); setModalOpen(true); };
 
-  const openEdit = (cat) => {
-    setEditId(cat.id);
-    setName(cat.name);
-    setDescription(cat.description || "");
-    setSelectedColor(cat.color);
-    setModalOpen(true);
-  };
-
-  const save = () => {
+  const save = async () => {
     if (!name.trim()) { showToast("Category name is required.", "error"); return; }
-    const data = { name: name.trim(), description: description.trim(), color: selectedColor };
-    let result;
-    if (editId) result = updateCategory(editId, data, session);
-    else result = addCategory(data, session);
-    if (result && result.error) { showToast(result.error, "error"); return; }
-    showToast(editId ? "Category updated." : "Category created.", "success");
-    setModalOpen(false);
-    refresh();
+    try {
+      const data = { name: name.trim(), description: description.trim(), color: selectedColor };
+      if (editId) await updateCategory(editId, data);
+      else await addCategory(data);
+      showToast(editId ? "Category updated." : "Category created.", "success");
+      setModalOpen(false);
+      refresh();
+    } catch (err) { showToast(err.message, "error"); }
   };
 
-  const handleDelete = () => {
-    const result = deleteCategory(deleteTarget.id, session);
-    if (result && result.error) showToast(result.error, "error");
-    else showToast("Category deleted.", "success");
+  const handleDelete = async () => {
+    try {
+      await deleteCategory(deleteTarget._id || deleteTarget.id);
+      showToast("Category deleted.", "success");
+    } catch (err) { showToast(err.message, "error"); }
     setDeleteTarget(null);
     refresh();
   };
@@ -75,16 +69,17 @@ export default function Categories() {
         </div>
       </div>
 
-      <div className="category-grid">
-        {categories.length === 0 ? (
-          <div className="table-empty" style={{ gridColumn: "1/-1" }}><i className="fa-solid fa-tags"></i>No categories match your search.</div>
-        ) : categories.map(c => {
-          const leadCount = getLeads().filter(l => l.category === c.name || (c.name === "Other" && l.customCategory)).length;
-          return (
-            <article key={c.id} className="category-card" style={{ "--cat-color": c.color }}>
+      {loading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "2rem", color: "var(--accent)" }}></i></div>
+      ) : (
+        <div className="category-grid">
+          {filtered.length === 0 ? (
+            <div className="table-empty" style={{ gridColumn: "1/-1" }}><i className="fa-solid fa-tags"></i>No categories match your search.</div>
+          ) : filtered.map(c => (
+            <article key={c._id || c.id} className="category-card" style={{ "--cat-color": c.color }}>
               <div className="category-card__header">
                 <span className="category-card__name">{escapeHtml(c.name)}</span>
-                <span className="badge badge--neutral">{leadCount} leads</span>
+                <span className="badge badge--neutral">{c.leadCount || 0} leads</span>
               </div>
               <p className="category-card__desc">{escapeHtml(c.description || "No description.")}</p>
               <div className="category-card__actions">
@@ -94,9 +89,9 @@ export default function Categories() {
                 )}
               </div>
             </article>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? "Edit Category" : "Add Category"} size="sm"
         footer={<>

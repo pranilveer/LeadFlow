@@ -4,17 +4,23 @@ import Modal from "../components/Modal";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import {
-  getLeads, getLeadsForUser, addLead, updateLead, deleteLead,
-  getCategories, categoryColor, statusBadgeClass, escapeHtml,
+  getLeads, getLeadStats, addLead, updateLead, deleteLead,
+  getCategories, importLeads, categoryColor, statusBadgeClass, escapeHtml,
   LEAD_STATUSES, LEAD_SOURCES, animateCounter, copyToClipboard,
-  leadsToCSV, parseCSV, downloadFile, formatISODate, logActivity,
+  leadsToCSV, parseCSV, downloadFile, formatISODate,
   getSettings, formatDisplayDateTime
-} from "../utils/storage";
+} from "../utils/api";
 
 export default function Dashboard() {
   const { session } = useAuth();
   const { showToast } = useToast();
   const [renderKey, setRenderKey] = useState(0);
+
+  const [leads, setLeads] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [stats, setStats] = useState({ total: 0, today: 0, categories: 0, myLeads: 0 });
+  const [settings, setSettingsState] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
@@ -40,8 +46,24 @@ export default function Dashboard() {
 
   const refresh = useCallback(() => setRenderKey(k => k + 1), []);
 
-  const categories = getCategories();
-  const leads = getLeadsForUser(session);
+  const loadData = useCallback(async () => {
+    try {
+      const [leadsData, catsData, statsData, settingsData] = await Promise.all([
+        getLeads(), getCategories(), getLeadStats(), getSettings()
+      ]);
+      setLeads(leadsData);
+      setCategories(catsData);
+      setStats(statsData);
+      setSettingsState(settingsData);
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
+
+  useEffect(() => { loadData(); }, [loadData, renderKey]);
+
   const today = formatISODate(new Date());
 
   const filteredLeads = leads.filter(l => {
@@ -62,16 +84,15 @@ export default function Dashboard() {
   const totalPages = Math.max(1, Math.ceil(filteredLeads.length / pageSize));
   const effectivePage = Math.min(page, totalPages);
   const pagedLeads = filteredLeads.slice((effectivePage - 1) * pageSize, effectivePage * pageSize);
-  const settings = getSettings();
 
   const uniqueOwners = [...new Set(leads.map(l => l.addedBy))].sort();
 
   useEffect(() => {
-    if (totalStatRef.current) animateCounter(totalStatRef.current, leads.length);
-    if (todayStatRef.current) animateCounter(todayStatRef.current, leads.filter(l => l.addedDate === today).length);
-    if (catStatRef.current) animateCounter(catStatRef.current, categories.length);
-    if (myStatRef.current) animateCounter(myStatRef.current, leads.filter(l => l.addedBy === session.username).length);
-  }, [renderKey, leads, categories, today, session.username]);
+    if (totalStatRef.current) animateCounter(totalStatRef.current, stats.total);
+    if (todayStatRef.current) animateCounter(todayStatRef.current, stats.today);
+    if (catStatRef.current) animateCounter(catStatRef.current, stats.categories);
+    if (myStatRef.current) animateCounter(myStatRef.current, stats.myLeads);
+  }, [renderKey, stats]);
 
   useEffect(() => { setPage(1); }, [searchQuery, filterStatus, filterCategory, filterOwner, pageSize]);
 
@@ -87,7 +108,7 @@ export default function Dashboard() {
     setFormOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!form.leadName) { showToast("Lead name is required.", "error"); return; }
     if (!form.businessName) { showToast("Business name is required.", "error"); return; }
@@ -95,34 +116,44 @@ export default function Dashboard() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { showToast("Enter a valid email address.", "error"); return; }
     if (!form.category) { showToast("Category is required.", "error"); return; }
 
-    if (editLead) {
-      updateLead(editLead.id, form, session);
-      showToast("Lead updated successfully.", "success");
-    } else {
-      addLead(form, session);
-      showToast("Lead created successfully.", "success");
+    try {
+      if (editLead) {
+        await updateLead(editLead.id, form);
+        showToast("Lead updated successfully.", "success");
+      } else {
+        await addLead(form);
+        showToast("Lead created successfully.", "success");
+      }
+      setFormOpen(false);
+      refresh();
+    } catch (err) {
+      showToast(err.message, "error");
     }
-    setFormOpen(false);
-    refresh();
   };
 
-  const handleDelete = () => {
-    if (deleteTarget && deleteLead(deleteTarget.id, session)) {
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteLead(deleteTarget.id);
       showToast("Lead deleted.", "success");
       refresh();
-    } else {
-      showToast("Unable to delete lead.", "error");
+    } catch (err) {
+      showToast(err.message, "error");
     }
     setDeleteTarget(null);
   };
 
-  const handleImport = () => {
-    let count = 0;
-    importRows.forEach(row => { if (row.leadName && row.email) { addLead(row, session); count++; } });
-    showToast(`${count} lead(s) imported.`, "success");
-    setImportRows([]);
-    setImportOpen(false);
-    refresh();
+  const handleImport = async () => {
+    try {
+      const valid = importRows.filter(row => row.leadName && row.email);
+      await importLeads(valid);
+      showToast(`${valid.length} lead(s) imported.`, "success");
+      setImportRows([]);
+      setImportOpen(false);
+      refresh();
+    } catch (err) {
+      showToast(err.message, "error");
+    }
   };
 
   const handleImportFile = (file) => {
@@ -141,13 +172,11 @@ export default function Dashboard() {
   const exportCSV = () => {
     downloadFile(leadsToCSV(filteredLeads), `leadflow-leads-${formatISODate(new Date())}.csv`, "text/csv");
     showToast(`CSV exported (${filteredLeads.length} leads).`, "success");
-    logActivity("system", `Exported ${filteredLeads.length} leads to CSV.`, session.username);
   };
 
   const exportJSON = () => {
     downloadFile(JSON.stringify(filteredLeads, null, 2), `leadflow-leads-${formatISODate(new Date())}.json`, "application/json");
     showToast(`JSON exported (${filteredLeads.length} leads).`, "success");
-    logActivity("system", `Exported ${filteredLeads.length} leads to JSON.`, session.username);
   };
 
   const handleSort = (key) => {
@@ -159,6 +188,16 @@ export default function Dashboard() {
     if (sortKey !== key) return "fa-sort";
     return sortDir === "asc" ? "fa-sort-up" : "fa-sort-down";
   };
+
+  if (loading) {
+    return (
+      <Layout activePage="dashboard">
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "400px" }}>
+          <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "2rem", color: "var(--accent)" }}></i>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout activePage="dashboard">
@@ -242,7 +281,7 @@ export default function Dashboard() {
               <div className="form-field">
                 <label className="form-label" htmlFor="category">Category <span className="form-label__required">*</span></label>
                 <select className="form-select" id="category" required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-                  {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  {categories.map(c => <option key={c._id || c.id} value={c.name}>{c.name}</option>)}
                 </select>
               </div>
               {form.category === "Other" && (
@@ -316,7 +355,7 @@ export default function Dashboard() {
             </select>
             <select className="form-select" style={{ width: "auto", minWidth: 140 }} aria-label="Filter by category" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
               <option value="">All Categories</option>
-              {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+              {categories.map(c => <option key={c._id || c.id} value={c.name}>{c.name}</option>)}
             </select>
             <select className="form-select" style={{ width: "auto", minWidth: 140 }} aria-label="Filter by owner" value={filterOwner} onChange={e => setFilterOwner(e.target.value)}>
               <option value="">All Owners</option>

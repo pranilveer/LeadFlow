@@ -1,13 +1,9 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 
-const DEMO_ACCOUNTS = [
-  { username: "Admin", password: "Admin@123", role: "Full access \u00b7 users & settings", color: "var(--accent)", initial: "A", avatarClass: "demo-account__avatar--admin" },
-  { username: "John", password: "John@123", role: "Standard user \u00b7 own leads", color: "var(--green)", initial: "J", avatarClass: "demo-account__avatar--john" },
-  { username: "Sarah", password: "Sarah@123", role: "Standard user \u00b7 own leads", color: "var(--purple)", initial: "S", avatarClass: "demo-account__avatar--sarah" },
-];
+
 
 export default function Login() {
   const { session, login } = useAuth();
@@ -21,20 +17,12 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (session) navigate("/dashboard", { replace: true });
-  }, [session, navigate]);
+  if (session) {
+    navigate("/dashboard", { replace: true });
+    return null;
+  }
 
-  useEffect(() => {
-    const remembered = localStorage.getItem("leadflow_remember_user");
-    if (remembered) { setUsername(remembered); setRememberMe(true); }
-  }, []);
-
-  useEffect(() => {
-    if (!rememberMe) localStorage.removeItem("leadflow_remember_user");
-  }, [rememberMe]);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     if (!username.trim()) { setError("Username is required."); return; }
@@ -42,8 +30,8 @@ export default function Login() {
     if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
 
     setLoading(true);
-    setTimeout(() => {
-      const s = login(username, password, rememberMe);
+    try {
+      const s = await login(username, password, rememberMe);
       if (!s) {
         setError("Invalid username or password. Try a demo account below.");
         setLoading(false);
@@ -51,14 +39,12 @@ export default function Login() {
       }
       if (rememberMe) localStorage.setItem("leadflow_remember_user", username.trim());
       navigate("/dashboard", { replace: true });
-    }, 400);
+    } catch (err) {
+      setError(err.message || "Invalid username or password. Try a demo account below.");
+      setLoading(false);
+    }
   };
 
-  const fillDemo = (demo) => {
-    setUsername(demo.username);
-    setPassword(demo.password);
-    setError("");
-  };
 
   return (
     <div className="auth-body light">
@@ -116,7 +102,7 @@ export default function Login() {
           <div className="glass-card auth-panel">
             <div className="auth-panel__header">
               <h2 id="signInHeading" className="auth-panel__title">Sign in</h2>
-              <p className="auth-panel__subtitle">Use a demo account below, or enter credentials stored in this browser session.</p>
+              <p className="auth-panel__subtitle">Use a demo account below, or enter your credentials.</p>
             </div>
 
             {error && (
@@ -129,13 +115,13 @@ export default function Login() {
             <form className="auth-form" onSubmit={handleSubmit} noValidate>
               <div className="form-field">
                 <label className="form-label" htmlFor="username">
-                  Username <span className="form-label__required" aria-hidden="true">*</span>
+                  Username or Email <span className="form-label__required" aria-hidden="true">*</span>
                 </label>
                 <div className="input-shell">
                   <span className="input-shell__icon" aria-hidden="true"><i className="fa-regular fa-user"></i></span>
-                  <input className="form-input" type="text" id="username" placeholder="Enter username" autoComplete="username" required spellCheck="false" value={username} onChange={e => setUsername(e.target.value)} />
+                  <input className="form-input" type="text" id="username" placeholder="Enter username or email" autoComplete="username" required spellCheck="false" value={username} onChange={e => setUsername(e.target.value)} />
                 </div>
-                <p className="form-hint">Demo users: Admin, John, Sarah</p>
+                <p className="form-hint">Enter your credentials to sign in.</p>
               </div>
 
               <div className="form-field">
@@ -169,29 +155,9 @@ export default function Login() {
               </button>
             </form>
 
-            <div className="demo-accounts">
-              <div className="demo-accounts__header">
-                <h3 className="demo-accounts__title">Demo accounts</h3>
-                <span className="badge badge--neutral">LocalStorage auth</span>
-              </div>
-              <div className="demo-accounts__grid" role="list">
-                {DEMO_ACCOUNTS.map(demo => (
-                  <button key={demo.username} type="button" className="demo-account" role="listitem" onClick={() => fillDemo(demo)} aria-label={`Fill ${demo.username} credentials`}>
-                    <span className={`demo-account__avatar ${demo.avatarClass}`} aria-hidden="true">{demo.initial}</span>
-                    <span className="demo-account__meta">
-                      <span className="demo-account__name">{demo.username}</span>
-                      <span className="demo-account__role">{demo.role}</span>
-                    </span>
-                    <span className="demo-account__action" aria-hidden="true"><i className="fa-solid fa-arrow-right"></i></span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <footer className="auth-panel__footer">
               <p>
-                Session data stays in this browser via LocalStorage.
-                <span className="auth-panel__footer-note">No backend required for this prototype.</span>
+                Don&apos;t have an account? <Link to="/signup" style={{ color: "var(--accent)", fontWeight: 600 }}>Create one</Link>
               </p>
             </footer>
           </div>
@@ -199,7 +165,7 @@ export default function Login() {
       </main>
 
       <footer className="auth-footer">
-        <p>&copy; {new Date().getFullYear()} LeadFlow CRM. Production-quality frontend prototype.</p>
+        <p>&copy; {new Date().getFullYear()} LeadFlow CRM. Production-ready with Node.js backend.</p>
       </footer>
     </div>
   );

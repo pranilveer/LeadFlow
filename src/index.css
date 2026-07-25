@@ -864,6 +864,40 @@ body.light ::-webkit-scrollbar-thumb:hover {
 
 .page-header__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
+.actions-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.35rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+  z-index: 200;
+}
+
+.actions-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 0.8125rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.actions-dropdown__item:hover { background: var(--panel); }
+
+.actions-dropdown__item i { width: 16px; text-align: center; color: var(--text-dim); }
+
+.actions-dropdown__divider { height: 1px; background: var(--border); margin: 0.25rem 0; }
+
 .sidebar-overlay {
   display: none;
   position: fixed;

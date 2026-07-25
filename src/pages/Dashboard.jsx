@@ -32,6 +32,7 @@ export default function Dashboard() {
   const [sortDir, setSortDir] = useState("desc");
 
   const [formOpen, setFormOpen] = useState(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
   const [editLead, setEditLead] = useState(null);
   const [form, setForm] = useState({ leadName: "", businessName: "", email: "", phone: "", website: "", category: "Technology", customCategory: "", city: "", state: "", country: "", address: "", description: "", leadSource: "Website", leadStatus: "New" });
 
@@ -95,6 +96,13 @@ export default function Dashboard() {
   }, [renderKey, stats]);
 
   useEffect(() => { setPage(1); }, [searchQuery, filterStatus, filterCategory, filterOwner, pageSize]);
+
+  useEffect(() => {
+    if (!actionsOpen) return;
+    const close = (e) => { if (!e.target.closest(".actions-dropdown")) setActionsOpen(false); };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [actionsOpen]);
 
   const openAddForm = () => {
     setEditLead(null);
@@ -207,10 +215,28 @@ export default function Dashboard() {
           <p className="page-subtitle">Overview of your lead pipeline and activity.</p>
         </div>
         <div className="page-header__actions">
-          <button type="button" className="btn btn--secondary btn--sm" onClick={() => setImportOpen(true)}><i className="fa-solid fa-file-import"></i> Import CSV</button>
-          <button type="button" className="btn btn--secondary btn--sm" onClick={exportCSV}><i className="fa-solid fa-file-csv"></i> Export CSV</button>
-          <button type="button" className="btn btn--secondary btn--sm" onClick={exportJSON}><i className="fa-solid fa-file-code"></i> Export JSON</button>
-          <button type="button" className="btn btn--ghost btn--sm" onClick={() => window.print()}><i className="fa-solid fa-print"></i> Print</button>
+          <div className="actions-dropdown" style={{ position: "relative" }}>
+            <button type="button" className="btn btn--secondary btn--sm" onClick={() => setActionsOpen(o => !o)}>
+              <i className="fa-solid fa-bars"></i> Actions <i className="fa-solid fa-chevron-down" style={{ fontSize: "0.65rem", marginLeft: "0.25rem" }}></i>
+            </button>
+            {actionsOpen && (
+              <div className="actions-dropdown__menu">
+                <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); setImportOpen(true); }}>
+                  <i className="fa-solid fa-file-import"></i> Import CSV
+                </button>
+                <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); exportCSV(); }}>
+                  <i className="fa-solid fa-file-csv"></i> Export CSV
+                </button>
+                <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); exportJSON(); }}>
+                  <i className="fa-solid fa-file-code"></i> Export JSON
+                </button>
+                <div className="actions-dropdown__divider"></div>
+                <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); window.print(); }}>
+                  <i className="fa-solid fa-print"></i> Print
+                </button>
+              </div>
+            )}
+          </div>
           <button type="button" className="btn btn--primary btn--sm" onClick={openAddForm}><i className="fa-solid fa-plus"></i> Add Lead</button>
         </div>
       </div>

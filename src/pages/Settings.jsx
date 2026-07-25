@@ -18,7 +18,7 @@ const ACTIVITY_ICONS = {
 };
 
 export default function Settings() {
-  const { session } = useAuth();
+  const { session, isAdmin } = useAuth();
   const { showToast } = useToast();
   const [activeSection, setActiveSection] = useState("general");
   const [activityFilter, setActivityFilter] = useState("");
@@ -27,12 +27,12 @@ export default function Settings() {
   const [resetOpen, setResetOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [generalForm, setGeneralForm] = useState({ companyName: "LeadFlow CRM", timezone: "America/New_York", leadsPerPage: 10, defaultLeadStatus: "New", defaultLeadSource: "Website" });
+  const [generalForm, setGeneralForm] = useState({ companyName: "LeadFlow CRM", timezone: "Asia/Kolkata", leadsPerPage: 10, defaultLeadStatus: "New", defaultLeadSource: "Website" });
   const [notifForm, setNotifForm] = useState({ emailNotifications: true, desktopNotifications: false, autoBackup: false });
 
   useEffect(() => {
     Promise.all([getSettings(), getActivities()]).then(([s, a]) => {
-      setGeneralForm({ companyName: s.companyName || "", timezone: s.timezone || "America/New_York", leadsPerPage: s.leadsPerPage || 10, defaultLeadStatus: s.defaultLeadStatus || "New", defaultLeadSource: s.defaultLeadSource || "Website" });
+      setGeneralForm({ companyName: s.companyName || "", timezone: s.timezone || "Asia/Kolkata", leadsPerPage: s.leadsPerPage || 10, defaultLeadStatus: s.defaultLeadStatus || "New", defaultLeadSource: s.defaultLeadSource || "Website" });
       setNotifForm({ emailNotifications: !!s.emailNotifications, desktopNotifications: !!s.desktopNotifications, autoBackup: !!s.autoBackup });
       setActivities(a);
       setLoading(false);
@@ -48,6 +48,10 @@ export default function Settings() {
 
   const saveGeneral = async (e) => {
     e.preventDefault();
+    if (!isAdmin) {
+      showToast("Only administrators can modify workspace settings.", "error");
+      return;
+    }
     try {
       await saveSettings({ ...generalForm, leadsPerPage: Number(generalForm.leadsPerPage) });
       showToast("Settings saved.", "success");
@@ -108,9 +112,9 @@ export default function Settings() {
   const navItems = [
     { key: "general", icon: "fa-sliders", label: "General" },
     { key: "notifications", icon: "fa-bell", label: "Notifications" },
-    { key: "backup", icon: "fa-database", label: "Backup & Restore" },
+    { key: "backup", icon: "fa-database", label: "Backup & Restore", adminOnly: true },
     { key: "activity", icon: "fa-clock-rotate-left", label: "Activity" },
-  ];
+  ].filter(item => !item.adminOnly || isAdmin);
 
   const activityFilters = [
     { filter: "", label: "All" },
@@ -126,7 +130,7 @@ export default function Settings() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Settings</h1>
-          <p className="page-subtitle">Configure your workspace, backup data, and review activity.</p>
+          <p className="page-subtitle">Configure your workspace, preferences, and review activity.</p>
         </div>
       </div>
 
@@ -147,27 +151,33 @@ export default function Settings() {
               <section className="settings-section settings-section--active panel-card">
                 <div className="panel-card__header"><h2 className="panel-card__title"><i className="fa-solid fa-sliders"></i> General Settings</h2></div>
                 <div className="panel-card__body">
+                  {!isAdmin && (
+                    <div className="alert alert--info" style={{ marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.65rem" }}>
+                      <i className="fa-solid fa-circle-info" style={{ color: "var(--accent)" }}></i>
+                      <span>Workspace settings (Company Name, Timezone, Defaults) are managed by an Administrator. You are viewing in read-only mode.</span>
+                    </div>
+                  )}
                   <form onSubmit={saveGeneral}>
                     <div className="form-grid form-grid--2">
                       <div className="form-field">
                         <label className="form-label">Company Name</label>
-                        <input className="form-input" type="text" value={generalForm.companyName} onChange={e => setGeneralForm({ ...generalForm, companyName: e.target.value })} />
+                        <input className="form-input" type="text" value={generalForm.companyName} onChange={e => setGeneralForm({ ...generalForm, companyName: e.target.value })} disabled={!isAdmin} />
                       </div>
                       <div className="form-field">
                         <label className="form-label">Timezone</label>
-                        <select className="form-select" value={generalForm.timezone} onChange={e => setGeneralForm({ ...generalForm, timezone: e.target.value })}>
+                        <select className="form-select" value={generalForm.timezone} onChange={e => setGeneralForm({ ...generalForm, timezone: e.target.value })} disabled={!isAdmin}>
+                          <option value="Asia/Kolkata">India (IST - UTC+5:30)</option>
                           <option value="America/New_York">Eastern (US)</option>
                           <option value="America/Chicago">Central (US)</option>
                           <option value="America/Denver">Mountain (US)</option>
                           <option value="America/Los_Angeles">Pacific (US)</option>
-                          <option value="Europe/London">London</option>
-                          <option value="Asia/Kolkata">India (IST)</option>
+                          <option value="Europe/London">London (GMT/BST)</option>
                           <option value="UTC">UTC</option>
                         </select>
                       </div>
                       <div className="form-field">
                         <label className="form-label">Leads Per Page</label>
-                        <select className="form-select" value={generalForm.leadsPerPage} onChange={e => setGeneralForm({ ...generalForm, leadsPerPage: e.target.value })}>
+                        <select className="form-select" value={generalForm.leadsPerPage} onChange={e => setGeneralForm({ ...generalForm, leadsPerPage: e.target.value })} disabled={!isAdmin}>
                           <option value="10">10</option>
                           <option value="25">25</option>
                           <option value="50">50</option>
@@ -175,18 +185,22 @@ export default function Settings() {
                       </div>
                       <div className="form-field">
                         <label className="form-label">Default Lead Status</label>
-                        <select className="form-select" value={generalForm.defaultLeadStatus} onChange={e => setGeneralForm({ ...generalForm, defaultLeadStatus: e.target.value })}>
+                        <select className="form-select" value={generalForm.defaultLeadStatus} onChange={e => setGeneralForm({ ...generalForm, defaultLeadStatus: e.target.value })} disabled={!isAdmin}>
                           {LEAD_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                       <div className="form-field">
                         <label className="form-label">Default Lead Source</label>
-                        <select className="form-select" value={generalForm.defaultLeadSource} onChange={e => setGeneralForm({ ...generalForm, defaultLeadSource: e.target.value })}>
+                        <select className="form-select" value={generalForm.defaultLeadSource} onChange={e => setGeneralForm({ ...generalForm, defaultLeadSource: e.target.value })} disabled={!isAdmin}>
                           {LEAD_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                     </div>
-                    <button type="submit" className="btn btn--primary" style={{ marginTop: "0.5rem" }}><i className="fa-solid fa-check"></i> Save Settings</button>
+                    {isAdmin && (
+                      <button type="submit" className="btn btn--primary" style={{ marginTop: "1rem" }}>
+                        <i className="fa-solid fa-check"></i> Save Settings
+                      </button>
+                    )}
                   </form>
                 </div>
               </section>

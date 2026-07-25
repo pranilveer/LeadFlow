@@ -29,20 +29,39 @@ export function isAdmin(session) {
   return session && session.role === "admin";
 }
 
+function friendlyError(msg) {
+  if (!msg) return "Something went wrong. Please try again.";
+  if (/buffering timed out|timeout|ECONNRESET|ECONNREFUSED|ETIMEDOUT/i.test(msg)) return "Server is not responding. Please try again later.";
+  if (/MongoNetworkError|network/i.test(msg)) return "Connection error. Please check your internet and try again.";
+  if (/MongoServerError|duplicate key/i.test(msg)) return "This record already exists.";
+  if (/CastError|ObjectId/i.test(msg)) return "Invalid request. Please try again.";
+  return msg;
+}
+
 async function request(method, path, body) {
   const headers = { "Content-Type": "application/json" };
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const opts = { method, headers };
   if (body && method !== "GET") opts.body = JSON.stringify(body);
-  const res = await fetch(`${BASE}${path}`, opts);
-  const data = await res.json();
+  let res;
+  try {
+    res = await fetch(`${BASE}${path}`, opts);
+  } catch (e) {
+    throw new Error("Cannot reach server. Please try again later.");
+  }
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error("Invalid response from server.");
+  }
   if (!res.ok) {
     if (res.status === 401) {
       clearSessionData();
       window.location.href = "/login";
     }
-    throw new Error(data.error || "Request failed");
+    throw new Error(friendlyError(data.error));
   }
   return data;
 }

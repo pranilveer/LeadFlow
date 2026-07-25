@@ -284,6 +284,8 @@ ul[role="list"], ol[role="list"] { list-style: none; }
 .checkbox input:checked + .checkbox__box { background: var(--accent); border-color: var(--accent); }
 .checkbox input:checked + .checkbox__box i { opacity: 1; transform: scale(1); }
 
+.auth-form__meta { padding-bottom: 1.5rem; }
+
 /* ─── Badges ────────────────────────────────────────────────────── */
 .badge {
   display: inline-flex;

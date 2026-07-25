@@ -111,7 +111,7 @@ function defaultCategories() {
 }
 
 function defaultSettings() {
-  return { companyName: "LeadFlow CRM", timezone: "America/New_York", dateFormat: "MMM D, YYYY", leadsPerPage: 10, defaultLeadStatus: "New", defaultLeadSource: "Website", emailNotifications: true, desktopNotifications: false, autoBackup: false };
+  return { companyName: "LeadFlow CRM", timezone: "Asia/Kolkata", dateFormat: "MMM D, YYYY", leadsPerPage: 10, defaultLeadStatus: "New", defaultLeadSource: "Website", emailNotifications: true, desktopNotifications: false, autoBackup: false };
 }
 
 function sampleLeads() {

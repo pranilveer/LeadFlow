@@ -118,10 +118,9 @@ export default function Dashboard() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!form.leadName) { showToast("Lead name is required.", "error"); return; }
     if (!form.businessName) { showToast("Business name is required.", "error"); return; }
-    if (!form.email) { showToast("Email is required.", "error"); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { showToast("Enter a valid email address.", "error"); return; }
+    if (!form.phone) { showToast("Phone number is required.", "error"); return; }
+    if (!form.phone) { showToast("Phone number is required.", "error"); return; }
     if (!form.category) { showToast("Category is required.", "error"); return; }
 
     try {
@@ -285,20 +284,20 @@ export default function Dashboard() {
           <form onSubmit={handleFormSubmit} noValidate>
             <div className="form-grid form-grid--3">
               <div className="form-field">
-                <label className="form-label" htmlFor="leadName">Lead Name <span className="form-label__required">*</span></label>
-                <input className="form-input" type="text" id="leadName" required placeholder="Full name" value={form.leadName} onChange={e => setForm({ ...form, leadName: e.target.value })} />
+                <label className="form-label" htmlFor="leadName">Lead Name</label>
+                <input className="form-input" type="text" id="leadName" placeholder="Full name" value={form.leadName} onChange={e => setForm({ ...form, leadName: e.target.value })} />
               </div>
               <div className="form-field">
                 <label className="form-label" htmlFor="businessName">Business Name <span className="form-label__required">*</span></label>
                 <input className="form-input" type="text" id="businessName" required placeholder="Company name" value={form.businessName} onChange={e => setForm({ ...form, businessName: e.target.value })} />
               </div>
               <div className="form-field">
-                <label className="form-label" htmlFor="email">Email <span className="form-label__required">*</span></label>
-                <input className="form-input" type="email" id="email" required placeholder="email@company.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                <label className="form-label" htmlFor="email">Email</label>
+                <input className="form-input" type="email" id="email" placeholder="email@company.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
               </div>
               <div className="form-field">
-                <label className="form-label" htmlFor="phone">Phone</label>
-                <input className="form-input" type="tel" id="phone" placeholder="+1 (555) 000-0000" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+                <label className="form-label" htmlFor="phone">Phone <span className="form-label__required">*</span></label>
+                <input className="form-input" type="tel" id="phone" required placeholder="+1 (555) 000-0000" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
               </div>
               <div className="form-field">
                 <label className="form-label" htmlFor="website">Website</label>

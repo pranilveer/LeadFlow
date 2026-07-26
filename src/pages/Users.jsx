@@ -30,6 +30,7 @@ export default function Users() {
   });
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [showModalPassword, setShowModalPassword] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const refresh = useCallback(() => setRenderKey(k => k + 1), []);
 
@@ -106,6 +107,7 @@ export default function Users() {
       showToast("Password must be at least 6 characters.", "error");
       return;
     }
+    setSaving(true);
     try {
       if (editId) {
         const updates = { ...formData };
@@ -120,6 +122,8 @@ export default function Users() {
       refresh();
     } catch (err) {
       showToast(err.message, "error");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -420,8 +424,11 @@ export default function Users() {
         footer={
           <>
             <button type="button" className="btn btn--ghost" onClick={() => setModalOpen(false)}>Cancel</button>
-            <button type="button" className="btn btn--primary" onClick={saveUser}>
-              <i className="fa-solid fa-check"></i> Save User
+            <button type="button" className="btn btn--primary" onClick={saveUser} disabled={saving}>
+              {saving
+                ? <><i className="fa-solid fa-spinner fa-spin"></i> Saving…</>
+                : <><i className="fa-solid fa-check"></i> Save User</>
+              }
             </button>
           </>
         }

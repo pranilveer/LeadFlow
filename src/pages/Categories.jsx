@@ -8,7 +8,7 @@ import { getCategories, addCategory, updateCategory, deleteCategory, escapeHtml 
 const SWATCHES = ["#60A5FA", "#34D399", "#FBBF24", "#F87171", "#C084FC", "#9AA3B5"];
 
 export default function Categories() {
-  const { session } = useAuth();
+  const { session, isAdmin } = useAuth();
   const { showToast } = useToast();
   const [renderKey, setRenderKey] = useState(0);
   const [categories, setCategories] = useState([]);
@@ -65,7 +65,7 @@ export default function Categories() {
           <p className="page-subtitle">Organize leads with color-coded categories.</p>
         </div>
         <div className="page-header__actions">
-          <button type="button" className="btn btn--primary btn--sm" onClick={openAdd}><i className="fa-solid fa-plus"></i> Add Category</button>
+          {isAdmin && <button type="button" className="btn btn--primary btn--sm" onClick={openAdd}><i className="fa-solid fa-plus"></i> Add Category</button>}
         </div>
       </div>
 
@@ -83,8 +83,8 @@ export default function Categories() {
               </div>
               <p className="category-card__desc">{escapeHtml(c.description || "No description.")}</p>
               <div className="category-card__actions">
-                <button type="button" className="btn btn--ghost btn--sm" onClick={() => openEdit(c)}><i className="fa-solid fa-pen"></i> Edit</button>
-                {c.name !== "Other" && (
+                {isAdmin && <button type="button" className="btn btn--ghost btn--sm" onClick={() => openEdit(c)}><i className="fa-solid fa-pen"></i> Edit</button>}
+                {c.name !== "Other" && isAdmin && (
                   <button type="button" className="btn btn--ghost btn--sm" style={{ color: "var(--red)" }} onClick={() => setDeleteTarget(c)}><i className="fa-solid fa-trash"></i> Delete</button>
                 )}
               </div>

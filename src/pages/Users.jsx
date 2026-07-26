@@ -35,6 +35,14 @@ export default function Users() {
   const refresh = useCallback(() => setRenderKey(k => k + 1), []);
 
   useEffect(() => {
+    const mql = window.matchMedia("(max-width: 768px)");
+    const handler = (e) => { if (e.matches) setViewMode("grid"); };
+    if (mql.matches) setViewMode("grid");
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
     getUsers()
       .then(data => {
         setUsers(data);
@@ -206,8 +214,8 @@ export default function Users() {
 
       {/* Toolbar: Search, Filters & View Mode Toggle */}
       <div className="table-toolbar" style={{ marginBottom: "1.25rem", display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", gap: "0.75rem", flex: 1, minWidth: "280px" }}>
-          <div className="navbar__search" style={{ maxWidth: "320px", flex: 1 }}>
+        <div style={{ display: "flex", gap: "0.75rem", flex: 1, minWidth: 0, flexWrap: "wrap" }}>
+          <div className="navbar__search" style={{ flex: 1, minWidth: 0 }}>
             <i className="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
             <input
               type="search"

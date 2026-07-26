@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
+import FilterDropdown from "../components/FilterDropdown";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { getUsers, addUser, updateUser, deleteUser, escapeHtml } from "../utils/api";
@@ -210,16 +211,17 @@ export default function Users() {
             />
           </div>
 
-          <select
-            className="form-select"
+          <FilterDropdown
+            label="All Roles"
+            icon="fa-solid fa-shield-halved"
+            options={[
+              { value: "all", label: `All Roles (${totalUsers})` },
+              { value: "admin", label: `Administrators (${adminCount})` },
+              { value: "user", label: `Team Members (${memberCount})` },
+            ]}
             value={roleFilter}
-            onChange={e => setRoleFilter(e.target.value)}
-            style={{ width: "auto", minWidth: "150px" }}
-          >
-            <option value="all">All Roles ({totalUsers})</option>
-            <option value="admin">Administrators ({adminCount})</option>
-            <option value="user">Team Members ({memberCount})</option>
-          </select>
+            onChange={setRoleFilter}
+          />
         </div>
 
         <div className="view-toggle">

@@ -127,7 +127,7 @@ export default function Signup() {
               </div>
 
               <button type="submit" className="btn btn--primary btn--block" disabled={loading}>
-                <span className="btn__label">{loading ? "Creating account\u2026" : "Create account"}</span>
+                <span className="btn__label">{loading ? "Creating account…" : "Create account"}</span>
                 <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
               </button>
             </form>

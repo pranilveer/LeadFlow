@@ -380,7 +380,7 @@ body.light ::-webkit-scrollbar-thumb:hover {
   transition: box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.panel-card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
+
 
 .panel-card__header {
   display: flex;
@@ -939,8 +939,7 @@ body.light ::-webkit-scrollbar-thumb:hover {
   transition: opacity 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
-.stat-card:hover::before { opacity: 1; }
+
 
 .stat-card__icon {
   width: 44px;
@@ -1475,7 +1474,7 @@ body.modal-active { overflow: hidden; }
   background: var(--cat-color, var(--accent));
 }
 
-.category-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
+
 
 .category-card__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem; }
 .category-card__name { font-weight: 700; font-size: 1rem; }
@@ -1500,7 +1499,7 @@ body.modal-active { overflow: hidden; }
   flex-direction: column;
 }
 
-.user-card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); transform: translateY(-2px); }
+
 
 .user-card__top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
 
@@ -1833,6 +1832,186 @@ body.modal-active { overflow: hidden; }
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* ─── Filter dropdown ──────────────────────────────────────────── */
+.filter-dropdown {
+  position: relative;
+}
+
+.filter-dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.85rem;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 150ms ease;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.filter-dropdown__trigger:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.filter-dropdown__trigger--open {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.filter-dropdown__trigger--active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.filter-dropdown__trigger i:first-child {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.filter-dropdown__chevron {
+  font-size: 0.6rem;
+  opacity: 0.5;
+  transition: transform 200ms ease;
+}
+
+.filter-dropdown__chevron--open {
+  transform: rotate(180deg);
+}
+
+.filter-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 200px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.35rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+  z-index: 300;
+  animation: fadeSlideDown 150ms ease;
+}
+
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.filter-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 120ms ease;
+  text-align: left;
+}
+
+.filter-dropdown__item:hover {
+  background: var(--panel);
+  color: var(--text);
+}
+
+.filter-dropdown__item--active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.filter-dropdown__check {
+  font-size: 0.65rem;
+  color: var(--accent);
+  width: 14px;
+  text-align: center;
+}
+
+.filter-dropdown__menu::-webkit-scrollbar { width: 5px; }
+.filter-dropdown__menu::-webkit-scrollbar-track { background: transparent; }
+.filter-dropdown__menu::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+/* ─── Leads mobile cards ───────────────────────────────────────── */
+.leads-cards {
+  display: none;
+}
+
+.lead-card {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  transition: background 150ms ease;
+}
+
+.lead-card:last-child { border-bottom: none; }
+.lead-card:hover { background: var(--accent-dim); }
+
+.lead-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.lead-card__name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.lead-card__business {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-top: 0.1rem;
+}
+
+.lead-card__actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.lead-card__actions .btn { padding: 0.4rem 0.55rem; font-size: 0.75rem; }
+
+.lead-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-top: 0.25rem;
+}
+
+.lead-card__meta i { font-size: 0.7rem; opacity: 0.6; margin-right: 0.2rem; }
+
+.lead-card__meta .copy-btn {
+  font-size: 0.78rem;
+  padding: 0.1rem 0.25rem;
+}
+
+.lead-card__badges {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
 /* ─── Print styles ──────────────────────────────────────────────── */
 @media print {
   .sidebar, .navbar, .table-toolbar, .pagination, .page-header__actions, .table-actions { display: none !important; }
@@ -1872,10 +2051,36 @@ body.modal-active { overflow: hidden; }
   .detail-grid { grid-template-columns: 1fr; }
   .navbar__search { max-width: none; }
   .page-content { padding: 1rem; }
+
+  .leads-desktop-table { display: none; }
+  .leads-cards { display: block; }
+
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .table-toolbar__search {
+    max-width: none;
+    min-width: 0;
+  }
+  .table-toolbar select {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .pagination {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+  }
 }
 
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }
   .auth-topbar { padding: 1rem; }
   .auth-panel { padding: 1.35rem; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .page-header__actions { width: 100%; }
+  .page-header__actions .btn { flex: 1; }
 }

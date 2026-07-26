@@ -86,7 +86,7 @@ export default function Layout({ activePage, children }) {
 
           <div className="navbar__search">
             <i className="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-            <input type="search" placeholder={`Search ${activePage}\u2026`} aria-label="Search" disabled />
+            <input type="search" placeholder={`Search ${activePage}…`} aria-label="Search" disabled />
           </div>
 
           <div className="navbar__actions">

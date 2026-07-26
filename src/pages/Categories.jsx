@@ -104,7 +104,7 @@ export default function Categories() {
         </div>
         <div className="form-field">
           <label className="form-label">Description</label>
-          <textarea className="form-textarea" placeholder="Brief description\u2026" value={description} onChange={e => setDescription(e.target.value)}></textarea>
+          <textarea className="form-textarea" placeholder="Brief description…" value={description} onChange={e => setDescription(e.target.value)}></textarea>
         </div>
         <div className="form-field">
           <label className="form-label">Color</label>

@@ -79,7 +79,7 @@ export default function Login() {
             </h1>
             <p className="auth-showcase__subtitle">
               Capture leads, organize categories, collaborate with your team, and keep every activity
-              auditable \u2014 all from one polished control center.
+              auditable — all from one polished control center.
             </p>
             <ul className="auth-feature-list" role="list">
               <li className="auth-feature-list__item">
@@ -150,7 +150,7 @@ export default function Login() {
               </div>
 
               <button type="submit" className="btn btn--primary btn--block" disabled={loading}>
-                <span className="btn__label">{loading ? "Signing in\u2026" : "Continue to dashboard"}</span>
+                <span className="btn__label">{loading ? "Signing in…" : "Continue to dashboard"}</span>
                 <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
               </button>
             </form>

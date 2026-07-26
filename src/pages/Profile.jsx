@@ -14,6 +14,8 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [leads, setLeads] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [actPage, setActPage] = useState(1);
+  const actPageSize = 8;
   const [loading, setLoading] = useState(true);
   const leadCountRef = useRef(null);
   const wonCountRef = useRef(null);
@@ -23,7 +25,7 @@ export default function Profile() {
       .then(([u, l, a]) => {
         setUser(u);
         setLeads(l);
-        setActivities(a.filter(act => act.user === u.username).slice(0, 15));
+        setActivities(a.filter(act => act.user === u.username));
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -31,6 +33,9 @@ export default function Profile() {
 
   const myLeads = user ? leads.filter(l => l.addedBy === user.username) : [];
   const wonCount = myLeads.filter(l => l.leadStatus === "Won").length;
+  const actTotalPages = Math.max(1, Math.ceil(activities.length / actPageSize));
+  const actEffectivePage = Math.min(actPage, actTotalPages);
+  const pagedActivities = activities.slice((actEffectivePage - 1) * actPageSize, actEffectivePage * actPageSize);
 
   const [form, setForm] = useState({
     name: "", email: "", phone: "", department: "", title: "", bio: "", newPassword: "", confirmPassword: ""
@@ -128,7 +133,7 @@ export default function Profile() {
               </div>
               <div className="form-field">
                 <label className="form-label">Bio</label>
-                <textarea className="form-textarea" placeholder="Tell us about yourself\u2026" value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })}></textarea>
+                <textarea className="form-textarea" placeholder="Tell us about yourself…" value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })}></textarea>
               </div>
               <hr style={{ border: "none", borderTop: "1px solid var(--border)", margin: "1.25rem 0" }} />
               <h3 style={{ fontSize: "0.9rem", fontWeight: 700, marginBottom: "1rem" }}>Change Password</h3>
@@ -154,9 +159,9 @@ export default function Profile() {
         </div>
         <div className="panel-card__body">
           <div className="timeline">
-            {activities.length === 0 ? (
+            {pagedActivities.length === 0 ? (
               <div className="table-empty"><i className="fa-solid fa-clock"></i>No recent activity.</div>
-            ) : activities.map(a => (
+            ) : pagedActivities.map(a => (
               <div key={a._id || a.id} className="timeline__item">
                 <span className="timeline__dot timeline__dot--system"><i className="fa-solid fa-circle"></i></span>
                 <div>
@@ -166,6 +171,18 @@ export default function Profile() {
               </div>
             ))}
           </div>
+          {activities.length > actPageSize && (
+            <div className="pagination">
+              <span>Showing {activities.length === 0 ? 0 : (actEffectivePage - 1) * actPageSize + 1}{"\u2013"}{Math.min(actEffectivePage * actPageSize, activities.length)} of {activities.length}</span>
+              <div className="pagination__controls">
+                <button type="button" className="pagination__btn" disabled={actEffectivePage <= 1} onClick={() => setActPage(p => p - 1)}><i className="fa-solid fa-chevron-left"></i></button>
+                {Array.from({ length: actTotalPages }, (_, i) => i + 1).map(i => (
+                  <button key={i} type="button" className={`pagination__btn ${i === actEffectivePage ? "pagination__btn--active" : ""}`} onClick={() => setActPage(i)}>{i}</button>
+                ))}
+                <button type="button" className="pagination__btn" disabled={actEffectivePage >= actTotalPages} onClick={() => setActPage(p => p + 1)}><i className="fa-solid fa-chevron-right"></i></button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </Layout>

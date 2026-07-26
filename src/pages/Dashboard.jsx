@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
+import FilterDropdown from "../components/FilterDropdown";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import {
@@ -275,94 +276,88 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <section className={`panel-card collapsible ${formOpen ? "collapsible--open" : ""}`} style={{ marginBottom: "1.5rem" }}>
-        <div className="panel-card__header collapsible__header" onClick={() => setFormOpen(!formOpen)} tabIndex={0} role="button" aria-expanded={formOpen}>
-          <h2 className="panel-card__title"><i className="fa-solid fa-pen-to-square"></i> <span>{editLead ? "Edit Lead" : "Add New Lead"}</span></h2>
-          <i className="fa-solid fa-chevron-down collapsible__icon"></i>
-        </div>
-        <div className="panel-card__body collapsible__body">
-          <form onSubmit={handleFormSubmit} noValidate>
-            <div className="form-grid form-grid--3">
-              <div className="form-field">
-                <label className="form-label" htmlFor="leadName">Lead Name</label>
-                <input className="form-input" type="text" id="leadName" placeholder="Full name" value={form.leadName} onChange={e => setForm({ ...form, leadName: e.target.value })} />
-              </div>
-              <div className="form-field">
-                <label className="form-label" htmlFor="businessName">Business Name <span className="form-label__required">*</span></label>
-                <input className="form-input" type="text" id="businessName" required placeholder="Company name" value={form.businessName} onChange={e => setForm({ ...form, businessName: e.target.value })} />
-              </div>
-              <div className="form-field">
-                <label className="form-label" htmlFor="email">Email</label>
-                <input className="form-input" type="email" id="email" placeholder="email@company.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-              </div>
-              <div className="form-field">
-                <label className="form-label" htmlFor="phone">Phone <span className="form-label__required">*</span></label>
-                <input className="form-input" type="tel" id="phone" required placeholder="+1 (555) 000-0000" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
-              </div>
-              <div className="form-field">
-                <label className="form-label" htmlFor="website">Website</label>
-                <input className="form-input" type="url" id="website" placeholder="https://example.com" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} />
-              </div>
-              <div className="form-field">
-                <label className="form-label" htmlFor="category">Category <span className="form-label__required">*</span></label>
-                <select className="form-select" id="category" required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-                  {categories.map(c => <option key={c._id || c.id} value={c.name}>{c.name}</option>)}
-                </select>
-              </div>
-              {form.category === "Other" && (
-                <div className="form-field">
-                  <label className="form-label" htmlFor="customCategory">Custom Category</label>
-                  <input className="form-input" type="text" id="customCategory" placeholder="Enter custom category" value={form.customCategory} onChange={e => setForm({ ...form, customCategory: e.target.value })} />
-                </div>
-              )}
-              <div className="form-field">
-                <label className="form-label" htmlFor="city">City</label>
-                <input className="form-input" type="text" id="city" placeholder="City" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} />
-              </div>
-              <div className="form-field">
-                <label className="form-label" htmlFor="state">State</label>
-                <input className="form-input" type="text" id="state" placeholder="State / Province" value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} />
-              </div>
-              <div className="form-field">
-                <label className="form-label" htmlFor="country">Country</label>
-                <input className="form-input" type="text" id="country" placeholder="Country" value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} />
-              </div>
-              <div className="form-field">
-                <label className="form-label" htmlFor="leadSource">Lead Source</label>
-                <select className="form-select" id="leadSource" value={form.leadSource} onChange={e => setForm({ ...form, leadSource: e.target.value })}>
-                  {LEAD_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div className="form-field">
-                <label className="form-label" htmlFor="leadStatus">Lead Status</label>
-                <select className="form-select" id="leadStatus" value={form.leadStatus} onChange={e => setForm({ ...form, leadStatus: e.target.value })}>
-                  {LEAD_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
+      <Modal open={formOpen} onClose={() => { setFormOpen(false); setEditLead(null); }} title={editLead ? "Edit Lead" : "Add New Lead"} size="lg"
+        footer={<>
+          <button type="button" className="btn btn--ghost" onClick={() => { setFormOpen(false); setEditLead(null); }}>Cancel</button>
+          <button type="submit" className="btn btn--primary" form="lead-form"><i className="fa-solid fa-check"></i> {editLead ? "Update Lead" : "Save Lead"}</button>
+        </>}>
+        <form id="lead-form" onSubmit={handleFormSubmit} noValidate>
+          <div className="form-grid form-grid--3">
+            <div className="form-field">
+              <label className="form-label" htmlFor="leadName">Lead Name</label>
+              <input className="form-input" type="text" id="leadName" placeholder="Full name" value={form.leadName} onChange={e => setForm({ ...form, leadName: e.target.value })} />
             </div>
             <div className="form-field">
-              <label className="form-label" htmlFor="address">Address</label>
-              <input className="form-input" type="text" id="address" placeholder="Street address" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
+              <label className="form-label" htmlFor="businessName">Business Name <span className="form-label__required">*</span></label>
+              <input className="form-input" type="text" id="businessName" required placeholder="Company name" value={form.businessName} onChange={e => setForm({ ...form, businessName: e.target.value })} />
             </div>
             <div className="form-field">
-              <label className="form-label" htmlFor="description">Description</label>
-              <textarea className="form-textarea" id="description" placeholder="Notes about this lead\u2026" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}></textarea>
+              <label className="form-label" htmlFor="email">Email</label>
+              <input className="form-input" type="email" id="email" placeholder="email@company.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
             </div>
-            {editLead && (
-              <div className="form-grid form-grid--2">
-                <div className="form-field"><label className="form-label">Lead ID</label><input className="form-input" type="text" value={editLead.id} readOnly /></div>
-                <div className="form-field"><label className="form-label">Added By</label><input className="form-input" type="text" value={editLead.addedBy} readOnly /></div>
-                <div className="form-field"><label className="form-label">Added Date</label><input className="form-input" type="text" value={editLead.addedDate} readOnly /></div>
-                <div className="form-field"><label className="form-label">Added Time</label><input className="form-input" type="text" value={editLead.addedTime} readOnly /></div>
+            <div className="form-field">
+              <label className="form-label" htmlFor="phone">Phone <span className="form-label__required">*</span></label>
+              <input className="form-input" type="tel" id="phone" required placeholder="+1 (555) 000-0000" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+            </div>
+            <div className="form-field">
+              <label className="form-label" htmlFor="website">Website</label>
+              <input className="form-input" type="url" id="website" placeholder="https://example.com" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} />
+            </div>
+            <div className="form-field">
+              <label className="form-label" htmlFor="category">Category <span className="form-label__required">*</span></label>
+              <select className="form-select" id="category" required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                {categories.map(c => <option key={c._id || c.id} value={c.name}>{c.name}</option>)}
+              </select>
+            </div>
+            {form.category === "Other" && (
+              <div className="form-field">
+                <label className="form-label" htmlFor="customCategory">Custom Category</label>
+                <input className="form-input" type="text" id="customCategory" placeholder="Enter custom category" value={form.customCategory} onChange={e => setForm({ ...form, customCategory: e.target.value })} />
               </div>
             )}
-            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
-              <button type="submit" className="btn btn--primary"><i className="fa-solid fa-check"></i> <span>{editLead ? "Update Lead" : "Save Lead"}</span></button>
-              {editLead && <button type="button" className="btn btn--ghost" onClick={() => { setFormOpen(false); setEditLead(null); }}>Cancel</button>}
+            <div className="form-field">
+              <label className="form-label" htmlFor="city">City</label>
+              <input className="form-input" type="text" id="city" placeholder="City" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} />
             </div>
-          </form>
-        </div>
-      </section>
+            <div className="form-field">
+              <label className="form-label" htmlFor="state">State</label>
+              <input className="form-input" type="text" id="state" placeholder="State / Province" value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} />
+            </div>
+            <div className="form-field">
+              <label className="form-label" htmlFor="country">Country</label>
+              <input className="form-input" type="text" id="country" placeholder="Country" value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} />
+            </div>
+            <div className="form-field">
+              <label className="form-label" htmlFor="leadSource">Lead Source</label>
+              <select className="form-select" id="leadSource" value={form.leadSource} onChange={e => setForm({ ...form, leadSource: e.target.value })}>
+                {LEAD_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="form-field">
+              <label className="form-label" htmlFor="leadStatus">Lead Status</label>
+              <select className="form-select" id="leadStatus" value={form.leadStatus} onChange={e => setForm({ ...form, leadStatus: e.target.value })}>
+                {LEAD_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="address">Address</label>
+            <input className="form-input" type="text" id="address" placeholder="Street address" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
+          </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="description">Description</label>
+            <textarea className="form-textarea" id="description" placeholder="Notes about this lead…" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}></textarea>
+          </div>
+          {editLead && (
+            <div className="form-grid form-grid--2">
+              <div className="form-field"><label className="form-label">Lead ID</label><input className="form-input" type="text" value={editLead.id} readOnly /></div>
+              <div className="form-field"><label className="form-label">Added By</label><input className="form-input" type="text" value={editLead.addedBy} readOnly /></div>
+              <div className="form-field"><label className="form-label">Added Date</label><input className="form-input" type="text" value={editLead.addedDate} readOnly /></div>
+              <div className="form-field"><label className="form-label">Added Time</label><input className="form-input" type="text" value={editLead.addedTime} readOnly /></div>
+            </div>
+          )}
+        </form>
+      </Modal>
 
       <section className="panel-card">
         <div className="panel-card__header">
@@ -372,27 +367,38 @@ export default function Dashboard() {
           <div className="table-toolbar" style={{ padding: "1rem 1.35rem 0" }}>
             <div className="table-toolbar__search">
               <i className="fa-solid fa-magnifying-glass"></i>
-              <input type="search" placeholder="Search leads\u2026" aria-label="Search leads table" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+              <input type="search" placeholder="Search leads…" aria-label="Search leads table" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
             </div>
-            <select className="form-select" style={{ width: "auto", minWidth: 140 }} aria-label="Filter by status" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-              <option value="">All Statuses</option>
-              {LEAD_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-            <select className="form-select" style={{ width: "auto", minWidth: 140 }} aria-label="Filter by category" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
-              <option value="">All Categories</option>
-              {categories.map(c => <option key={c._id || c.id} value={c.name}>{c.name}</option>)}
-            </select>
-            <select className="form-select" style={{ width: "auto", minWidth: 140 }} aria-label="Filter by owner" value={filterOwner} onChange={e => setFilterOwner(e.target.value)}>
-              <option value="">All Owners</option>
-              {uniqueOwners.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
-            <select className="form-select" style={{ width: "auto", minWidth: 100 }} aria-label="Rows per page" value={pageSize} onChange={e => setPageSize(Number(e.target.value))}>
-              <option value="10">10 / page</option>
-              <option value="25">25 / page</option>
-              <option value="50">50 / page</option>
-            </select>
+            <FilterDropdown
+              label="All Statuses"
+              icon="fa-solid fa-circle-dot"
+              options={[{ value: "", label: "All Statuses" }, ...LEAD_STATUSES.map(s => ({ value: s, label: s }))]}
+              value={filterStatus}
+              onChange={setFilterStatus}
+            />
+            <FilterDropdown
+              label="All Categories"
+              icon="fa-solid fa-tag"
+              options={[{ value: "", label: "All Categories" }, ...categories.map(c => ({ value: c.name, label: c.name }))]}
+              value={filterCategory}
+              onChange={setFilterCategory}
+            />
+            <FilterDropdown
+              label="All Owners"
+              icon="fa-solid fa-user"
+              options={[{ value: "", label: "All Owners" }, ...uniqueOwners.map(o => ({ value: o, label: o }))]}
+              value={filterOwner}
+              onChange={setFilterOwner}
+            />
+            <FilterDropdown
+              label="Rows"
+              icon="fa-solid fa-list"
+              options={[{ value: "10", label: "10 / page" }, { value: "25", label: "25 / page" }, { value: "50", label: "50 / page" }]}
+              value={String(pageSize)}
+              onChange={(v) => setPageSize(Number(v))}
+            />
           </div>
-          <div className="table-wrap" style={{ border: "none", borderRadius: 0 }}>
+          <div className="table-wrap leads-desktop-table" style={{ border: "none", borderRadius: 0 }}>
             <table className="data-table" aria-label="Leads data grid">
               <thead>
                 <tr>
@@ -438,13 +444,46 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
+          <div className="leads-cards">
+            {pagedLeads.length === 0 ? (
+              <div className="table-empty"><i className="fa-solid fa-inbox"></i>No leads found. Add a lead or adjust your filters.</div>
+            ) : pagedLeads.map(l => {
+              const catColor = categoryColor(l.category, categories);
+              const catDisplay = l.category === "Other" && l.customCategory ? l.customCategory : l.category;
+              return (
+                <div key={l.id} className="lead-card">
+                  <div className="lead-card__top">
+                    <div>
+                      <div className="lead-card__name">{l.leadName || "\u2014"}</div>
+                      <div className="lead-card__business">{l.businessName}</div>
+                    </div>
+                    <div className="lead-card__actions">
+                      <button type="button" className="btn btn--ghost btn--sm" title="View" onClick={() => setViewLead(l)}><i className="fa-solid fa-eye"></i></button>
+                      <button type="button" className="btn btn--ghost btn--sm" title="Edit" onClick={() => openEditForm(l)}><i className="fa-solid fa-pen"></i></button>
+                      <button type="button" className="btn btn--ghost btn--sm" title="Delete" style={{ color: "var(--red)" }} onClick={() => setDeleteTarget(l)}><i className="fa-solid fa-trash"></i></button>
+                    </div>
+                  </div>
+                  <div className="lead-card__badges">
+                    <span className={`badge ${statusBadgeClass(l.leadStatus)}`}>{l.leadStatus}</span>
+                    <span className="category-badge" style={{ background: catColor + "18", color: catColor, borderColor: catColor + "30" }}><span className="category-badge__dot" style={{ background: catColor }}></span>{catDisplay}</span>
+                  </div>
+                  <div className="lead-card__meta">
+                    {l.email && <span><i className="fa-regular fa-envelope"></i><button type="button" className="copy-btn" onClick={() => handleCopy(l.email)} title="Copy email">{l.email} <i className="fa-regular fa-copy"></i></button></span>}
+                    {l.phone && <span><i className="fa-solid fa-phone"></i><button type="button" className="copy-btn" onClick={() => handleCopy(l.phone)} title="Copy phone">{l.phone} <i className="fa-regular fa-copy"></i></button></span>}
+                    {l.city && <span><i className="fa-solid fa-location-dot"></i>{l.city}{l.state ? `, ${l.state}` : ""}</span>}
+                    <span><i className="fa-regular fa-calendar"></i>{l.addedDate}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
           <div className="pagination">
-            <span>Showing {filteredLeads.length === 0 ? 0 : (effectivePage - 1) * pageSize + 1}\u2013{Math.min(effectivePage * pageSize, filteredLeads.length)} of {filteredLeads.length}</span>
+            <span>Showing {filteredLeads.length === 0 ? 0 : (effectivePage - 1) * pageSize + 1}{"\u2013"}{Math.min(effectivePage * pageSize, filteredLeads.length)} of {filteredLeads.length}</span>
             <div className="pagination__controls">
               <button type="button" className="pagination__btn" disabled={effectivePage <= 1} onClick={() => setPage(p => p - 1)}><i className="fa-solid fa-chevron-left"></i></button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).filter(i => totalPages <= 7 || i <= 3 || i >= totalPages - 2 || Math.abs(i - effectivePage) <= 1).map((i, idx, arr) => {
                 const items = [];
-                if (idx > 0 && arr[idx - 1] !== i - 1) items.push(<span key={`e${i}`} style={{ padding: "0 0.25rem" }}>\u2026</span>);
+                if (idx > 0 && arr[idx - 1] !== i - 1) items.push(<span key={`e${i}`} style={{ padding: "0 0.25rem" }}>{"\u2026"}</span>);
                 items.push(<button key={i} type="button" className={`pagination__btn ${i === effectivePage ? "pagination__btn--active" : ""}`} onClick={() => setPage(i)}>{i}</button>);
                 return items;
               })}

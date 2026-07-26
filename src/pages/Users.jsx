@@ -29,6 +29,7 @@ export default function Users() {
     bio: "",
   });
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showModalPassword, setShowModalPassword] = useState(false);
 
   const refresh = useCallback(() => setRenderKey(k => k + 1), []);
 
@@ -74,12 +75,14 @@ export default function Users() {
 
   const openAdd = () => {
     setEditId("");
+    setShowModalPassword(false);
     setFormData({ username: "", password: "", name: "", email: "", phone: "", role: "user", title: "", department: "", bio: "" });
     setModalOpen(true);
   };
 
   const openEdit = (u) => {
     setEditId(u._id || u.id);
+    setShowModalPassword(false);
     setFormData({
       username: u.username,
       password: "",
@@ -435,14 +438,20 @@ export default function Users() {
           </div>
           <div className="form-field">
             <label className="form-label">Password {!editId && <span className="form-label__required">*</span>}</label>
-            <input
-              className="form-input"
-              type="password"
-              minLength="6"
-              placeholder={editId ? "Leave empty to retain current" : "Minimum 6 characters"}
-              value={formData.password}
-              onChange={e => setFormData({ ...formData, password: e.target.value })}
-            />
+            <div style={{ position: "relative" }}>
+              <input
+                className="form-input"
+                type={showModalPassword ? "text" : "password"}
+                minLength="6"
+                placeholder={editId ? "Leave empty to retain current" : "Minimum 6 characters"}
+                value={formData.password}
+                onChange={e => setFormData({ ...formData, password: e.target.value })}
+                style={{ paddingRight: "2.5rem" }}
+              />
+              <button type="button" onClick={() => setShowModalPassword(v => !v)} style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-dim)", fontSize: "0.85rem", padding: "0.2rem" }}>
+                <i className={`fa-regular ${showModalPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+              </button>
+            </div>
             {editId && <p className="form-hint">Leave blank to keep current password.</p>}
           </div>
           <div className="form-field">

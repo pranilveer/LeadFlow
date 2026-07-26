@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 
@@ -157,7 +157,7 @@ export default function Login() {
 
             <footer className="auth-panel__footer">
               <p>
-                Don&apos;t have an account? <Link to="/signup" style={{ color: "var(--accent)", fontWeight: 600 }}>Create one</Link>
+                Contact your administrator to get access.
               </p>
             </footer>
           </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-export default function FilterDropdown({ label, icon, options, value, onChange }) {
+export default function FilterDropdown({ label, icon, options, value, onChange, disabled }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const selected = options.find(o => o.value === value);
@@ -18,11 +18,14 @@ export default function FilterDropdown({ label, icon, options, value, onChange }
     <div className="filter-dropdown" ref={ref}>
       <button
         type="button"
-        className={`filter-dropdown__trigger ${open ? "filter-dropdown__trigger--open" : ""} ${isActive ? "filter-dropdown__trigger--active" : ""}`}
-        onClick={() => setOpen(o => !o)}
+        className={`filter-dropdown__trigger ${open ? "filter-dropdown__trigger--open" : ""} ${isActive ? "filter-dropdown__trigger--active" : ""} ${disabled ? "filter-dropdown__trigger--disabled" : ""}`}
+        onClick={() => { if (!disabled) setOpen(o => !o); }}
+        disabled={disabled}
       >
-        {icon && <i className={icon}></i>}
-        <span className="filter-dropdown__label">{displayLabel}</span>
+        <span className="filter-dropdown__content">
+          {icon && <i className={icon}></i>}
+          <span className="filter-dropdown__label">{displayLabel}</span>
+        </span>
         <i className={`fa-solid fa-chevron-down filter-dropdown__chevron ${open ? "filter-dropdown__chevron--open" : ""}`}></i>
       </button>
       {open && (

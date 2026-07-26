@@ -308,16 +308,17 @@ export default function Users() {
                       </span>
                     </td>
                     <td>
-                      <select
-                        className={`role-select ${u.role === "admin" ? "role-select--admin" : "role-select--user"}`}
+                      <FilterDropdown
+                        label="Role"
+                        icon={u.role === "admin" ? "fa-solid fa-crown" : "fa-solid fa-user"}
+                        options={[
+                          { value: "user", label: "Team Member" },
+                          { value: "admin", label: "Administrator" },
+                        ]}
                         value={u.role}
-                        onChange={e => handleRoleChange(u, e.target.value)}
+                        onChange={(val) => handleRoleChange(u, val)}
                         disabled={isSelf || !isAdmin}
-                        title={isSelf ? "You cannot change your own role." : "Change user role"}
-                      >
-                        <option value="user">Team Member</option>
-                        <option value="admin">Administrator</option>
-                      </select>
+                      />
                     </td>
                     <td style={{ textAlign: "right" }}>
                       <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
@@ -379,17 +380,17 @@ export default function Users() {
                   </div>
 
                   <div style={{ marginTop: "0.5rem", paddingTop: "0.5rem", borderTop: "1px dashed var(--border)" }}>
-                    <label className="form-label" style={{ fontSize: "0.75rem", marginBottom: "0.35rem", display: "block" }}>Role & Permission</label>
-                    <select
-                      className={`role-select ${u.role === "admin" ? "role-select--admin" : "role-select--user"}`}
-                      style={{ width: "100%" }}
+                    <FilterDropdown
+                      label="Role"
+                      icon={u.role === "admin" ? "fa-solid fa-crown" : "fa-solid fa-user"}
+                      options={[
+                        { value: "user", label: "Team Member" },
+                        { value: "admin", label: "Administrator" },
+                      ]}
                       value={u.role}
-                      onChange={e => handleRoleChange(u, e.target.value)}
+                      onChange={(val) => handleRoleChange(u, val)}
                       disabled={isSelf || !isAdmin}
-                    >
-                      <option value="user">Team Member</option>
-                      <option value="admin">Administrator</option>
-                    </select>
+                    />
                   </div>
                 </div>
 
@@ -465,15 +466,17 @@ export default function Users() {
           </div>
           <div className="form-field">
             <label className="form-label">Role & Permission</label>
-            <select
-              className="form-select"
+            <FilterDropdown
+              label="Select Role"
+              icon="fa-solid fa-shield-halved"
+              options={[
+                { value: "user", label: "Team Member" },
+                { value: "admin", label: "Administrator" },
+              ]}
               value={formData.role}
-              onChange={e => setFormData({ ...formData, role: e.target.value })}
+              onChange={(val) => setFormData({ ...formData, role: val })}
               disabled={editId && editId === session.userId}
-            >
-              <option value="user">Team Member</option>
-              <option value="admin">Administrator</option>
-            </select>
+            />
           </div>
           <div className="form-field">
             <label className="form-label">Email</label>

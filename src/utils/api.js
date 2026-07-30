@@ -258,6 +258,22 @@ export async function resetAllData() {
   return request("POST", "/api/backup/reset");
 }
 
+export async function createInvite() {
+  return request("POST", "/api/auth/invite");
+}
+
+export async function getInvite(code) {
+  return request("GET", `/api/auth/invite/${encodeURIComponent(code)}`);
+}
+
+export async function joinViaInvite(code, username, password, name, email) {
+  const data = await request("POST", `/api/auth/join/${encodeURIComponent(code)}`, { username, password, name, email });
+  localStorage.setItem("leadflow_token", data.token);
+  const session = buildSession(data, false);
+  setSessionData(session);
+  return session;
+}
+
 export function categoryColor(name, categories) {
   const cat = categories.find(c => c.name === name);
   return cat ? cat.color : "#9AA3B5";

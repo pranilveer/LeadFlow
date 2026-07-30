@@ -162,6 +162,9 @@ export default function Login() {
               <p style={{ marginTop: "0.75rem" }}>
                 <Link to="/onboarding" style={{ color: "var(--accent)", fontWeight: 600 }}>Create a new company</Link>
               </p>
+              <p style={{ marginTop: "0.35rem", fontSize: "0.85rem" }}>
+                <Link to="/join" style={{ color: "var(--text-dim)" }}>Join with an invite link</Link>
+              </p>
             </footer>
           </div>
         </section>

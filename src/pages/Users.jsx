@@ -4,7 +4,7 @@ import Modal from "../components/Modal";
 import FilterDropdown from "../components/FilterDropdown";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
-import { getUsers, addUser, updateUser, deleteUser, escapeHtml } from "../utils/api";
+import { getUsers, addUser, updateUser, deleteUser, createInvite, escapeHtml } from "../utils/api";
 
 export default function Users() {
   const { session, isAdmin } = useAuth();
@@ -31,6 +31,8 @@ export default function Users() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [showModalPassword, setShowModalPassword] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [inviteCode, setInviteCode] = useState("");
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const refresh = useCallback(() => setRenderKey(k => k + 1), []);
 
@@ -147,6 +149,18 @@ export default function Users() {
     }
   };
 
+  const generateInvite = async () => {
+    try {
+      const data = await createInvite();
+      setInviteCode(data.code);
+      setInviteModalOpen(true);
+    } catch (err) {
+      showToast(err.message, "error");
+    }
+  };
+
+  const inviteLink = inviteCode ? `${window.location.origin}/join/${inviteCode}` : "";
+
   return (
     <Layout activePage="users">
       <div className="page-header">
@@ -155,6 +169,9 @@ export default function Users() {
           <p className="page-subtitle">Admin-only access to manage team members, permissions, and roles.</p>
         </div>
         <div className="page-header__actions">
+          <button type="button" className="btn btn--secondary btn--sm" onClick={generateInvite} disabled={!isAdmin}>
+            <i className="fa-solid fa-link"></i> Invite Link
+          </button>
           <button type="button" className="btn btn--primary btn--sm" onClick={openAdd} disabled={!isAdmin}>
             <i className="fa-solid fa-user-plus"></i> Add User
           </button>
@@ -562,6 +579,20 @@ export default function Users() {
         <p style={{ marginTop: "0.5rem", fontSize: "0.85rem", color: "var(--text-faint)" }}>
           Their assigned leads will remain safely saved in the database.
         </p>
+      </Modal>
+
+      <Modal open={inviteModalOpen} onClose={() => { setInviteModalOpen(false); setInviteCode(""); }} title="Invite Link" size="sm"
+        footer={<>
+          <button type="button" className="btn btn--primary" onClick={() => { navigator.clipboard.writeText(inviteLink); showToast("Link copied to clipboard.", "success"); }}>
+            <i className="fa-regular fa-copy"></i> Copy Link
+          </button>
+          <button type="button" className="btn btn--ghost" onClick={() => { setInviteModalOpen(false); setInviteCode(""); }}>Close</button>
+        </>}>
+        <p style={{ marginBottom: "0.75rem" }}>Share this link with team members to join your organization:</p>
+        <div className="input-shell" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <input className="form-input" type="text" value={inviteLink} readOnly onClick={(e) => e.target.select()} style={{ flex: 1 }} />
+        </div>
+        <p className="form-hint" style={{ marginTop: "0.5rem" }}>Link never expires. You can create a new one anytime.</p>
       </Modal>
     </Layout>
   );

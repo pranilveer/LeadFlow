@@ -57,7 +57,7 @@ async function request(method, path, body) {
     throw new Error("Invalid response from server.");
   }
   if (!res.ok) {
-    if (res.status === 401) {
+    if (res.status === 401 && !path.startsWith("/api/auth/login")) {
       clearSessionData();
       window.location.href = "/login";
     }

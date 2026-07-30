@@ -1635,6 +1635,35 @@ body.modal-active { overflow: hidden; }
 .settings-section { display: none; }
 .settings-section--active { display: block; animation: fadeIn 0.3s ease; }
 
+.notif-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-2);
+  transition: border-color 150ms ease;
+}
+
+.notif-item + .notif-item { margin-top: 0.65rem; }
+
+.notif-item:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+
+.notif-item__info { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+
+.notif-item__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.notif-item__desc {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
 .backup-zone {
   border: 2px dashed var(--border);
   border-radius: 14px;

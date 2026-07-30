@@ -211,21 +211,36 @@ export default function Settings() {
                 <div className="panel-card__header"><h2 className="panel-card__title"><i className="fa-solid fa-bell"></i> Notifications</h2></div>
                 <div className="panel-card__body">
                   <form onSubmit={saveNotif}>
-                    <label className="checkbox" style={{ marginBottom: "1rem" }}>
-                      <input type="checkbox" checked={notifForm.emailNotifications} onChange={e => setNotifForm({ ...notifForm, emailNotifications: e.target.checked })} />
-                      <span className="checkbox__box"><i className="fa-solid fa-check"></i></span>
-                      <span className="checkbox__label">Email notifications for new leads</span>
-                    </label>
-                    <label className="checkbox" style={{ marginBottom: "1rem" }}>
-                      <input type="checkbox" checked={notifForm.desktopNotifications} onChange={e => setNotifForm({ ...notifForm, desktopNotifications: e.target.checked })} />
-                      <span className="checkbox__box"><i className="fa-solid fa-check"></i></span>
-                      <span className="checkbox__label">Desktop notifications</span>
-                    </label>
-                    <label className="checkbox">
-                      <input type="checkbox" checked={notifForm.autoBackup} onChange={e => setNotifForm({ ...notifForm, autoBackup: e.target.checked })} />
-                      <span className="checkbox__box"><i className="fa-solid fa-check"></i></span>
-                      <span className="checkbox__label">Prompt for backup on logout</span>
-                    </label>
+                    <div className="notif-item">
+                      <div className="notif-item__info">
+                        <span className="notif-item__label">Email notifications for new leads</span>
+                        <span className="notif-item__desc">Receive an email alert whenever a new lead is added to the system.</span>
+                      </div>
+                      <label className="checkbox">
+                        <input type="checkbox" checked={notifForm.emailNotifications} onChange={e => setNotifForm({ ...notifForm, emailNotifications: e.target.checked })} />
+                        <span className="checkbox__box"><i className="fa-solid fa-check"></i></span>
+                      </label>
+                    </div>
+                    <div className="notif-item">
+                      <div className="notif-item__info">
+                        <span className="notif-item__label">Desktop notifications</span>
+                        <span className="notif-item__desc">Show browser push notifications for new leads and activity.</span>
+                      </div>
+                      <label className="checkbox">
+                        <input type="checkbox" checked={notifForm.desktopNotifications} onChange={e => setNotifForm({ ...notifForm, desktopNotifications: e.target.checked })} />
+                        <span className="checkbox__box"><i className="fa-solid fa-check"></i></span>
+                      </label>
+                    </div>
+                    <div className="notif-item">
+                      <div className="notif-item__info">
+                        <span className="notif-item__label">Prompt for backup on logout</span>
+                        <span className="notif-item__desc">Ask to download a data backup before signing out.</span>
+                      </div>
+                      <label className="checkbox">
+                        <input type="checkbox" checked={notifForm.autoBackup} onChange={e => setNotifForm({ ...notifForm, autoBackup: e.target.checked })} />
+                        <span className="checkbox__box"><i className="fa-solid fa-check"></i></span>
+                      </label>
+                    </div>
                     <button type="submit" className="btn btn--primary" style={{ marginTop: "1.25rem" }}><i className="fa-solid fa-check"></i> Save Preferences</button>
                   </form>
                 </div>

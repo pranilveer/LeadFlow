@@ -61,13 +61,13 @@ export default function Layout({ activePage, children }) {
               <span className="brand__tag">CRM</span>
             </span>
           </NavLink>
-          {session.organizationName && (
-            <div className="sidebar__org">
-              <i className="fa-solid fa-building" style={{ fontSize: "0.7rem", marginRight: "0.35rem", opacity: 0.6 }}></i>
-              <span style={{ fontSize: "0.75rem", opacity: 0.75, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{session.organizationName}</span>
-            </div>
-          )}
         </div>
+        {session.organizationName && (
+          <div className="sidebar__workspace">
+            <span className="sidebar__workspace-label">WORKSPACE</span>
+            <span className="sidebar__workspace-name">{session.organizationName}</span>
+          </div>
+        )}
         <nav className="sidebar-nav" aria-label="Sidebar links">
           {navItems.map(item => (
             <NavLink

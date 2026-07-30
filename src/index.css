@@ -664,6 +664,32 @@ body.light ::-webkit-scrollbar-thumb:hover {
   align-items: center;
 }
 
+.sidebar__workspace {
+  padding: 0.6rem 1.35rem 0.3rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.sidebar__workspace-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  letter-spacing: 0.1em;
+}
+
+.sidebar__workspace-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar--collapsed .sidebar__workspace { display: none; }
+
 .sidebar-nav {
   flex: 1;
   padding: 1rem 0.75rem;

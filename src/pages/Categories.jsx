@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import { useAuth } from "../contexts/AuthContext";
@@ -76,19 +77,19 @@ export default function Categories() {
           {filtered.length === 0 ? (
             <div className="table-empty" style={{ gridColumn: "1/-1" }}><i className="fa-solid fa-tags"></i>No categories match your search.</div>
           ) : filtered.map(c => (
-            <article key={c._id || c.id} className="category-card" style={{ "--cat-color": c.color }}>
+            <Link to={`/categories/${c._id || c.id}`} key={c._id || c.id} className="category-card" style={{ "--cat-color": c.color, textDecoration: "none", color: "inherit" }}>
               <div className="category-card__header">
                 <span className="category-card__name">{escapeHtml(c.name)}</span>
                 <span className="badge badge--neutral">{c.leadCount || 0} leads</span>
               </div>
               <p className="category-card__desc">{escapeHtml(c.description || "No description.")}</p>
-              <div className="category-card__actions">
+              <div className="category-card__actions" onClick={e => e.stopPropagation()}>
                 {isAdmin && <button type="button" className="btn btn--ghost btn--sm" onClick={() => openEdit(c)}><i className="fa-solid fa-pen"></i> Edit</button>}
                 {c.name !== "Other" && isAdmin && (
                   <button type="button" className="btn btn--ghost btn--sm" style={{ color: "var(--red)" }} onClick={() => setDeleteTarget(c)}><i className="fa-solid fa-trash"></i> Delete</button>
                 )}
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       )}

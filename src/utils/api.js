@@ -205,6 +205,10 @@ export async function getCategories() {
   return request("GET", "/api/categories");
 }
 
+export async function getCategory(id) {
+  return request("GET", `/api/categories/${encodeURIComponent(id)}`);
+}
+
 export async function addCategory(data) {
   return request("POST", "/api/categories", data);
 }
@@ -215,6 +219,22 @@ export async function updateCategory(id, data) {
 
 export async function deleteCategory(id) {
   return request("DELETE", `/api/categories/${encodeURIComponent(id)}`);
+}
+
+export async function getProjects(categoryId) {
+  return request("GET", `/api/projects/${encodeURIComponent(categoryId)}`);
+}
+
+export async function addProject(categoryId, data) {
+  return request("POST", `/api/projects/${encodeURIComponent(categoryId)}`, data);
+}
+
+export async function updateProject(categoryId, projectId, data) {
+  return request("PUT", `/api/projects/${encodeURIComponent(categoryId)}/${encodeURIComponent(projectId)}`, data);
+}
+
+export async function deleteProject(categoryId, projectId) {
+  return request("DELETE", `/api/projects/${encodeURIComponent(categoryId)}/${encodeURIComponent(projectId)}`);
 }
 
 export async function getUsers() {

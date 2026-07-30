@@ -1,10 +1,16 @@
-import { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { getSession, login as apiLogin, register as apiRegister, logout as apiLogout, isAdmin as checkAdmin } from "../utils/api";
+import { createContext, useContext, useState, useCallback } from "react";
+import { getSession, onboard as apiOnboard, login as apiLogin, register as apiRegister, logout as apiLogout, isAdmin as checkAdmin } from "../utils/api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [session, setSessionState] = useState(() => getSession());
+
+  const onboard = useCallback(async (orgName, username, password, name, email) => {
+    const s = await apiOnboard(orgName, username, password, name, email);
+    setSessionState(s);
+    return s;
+  }, []);
 
   const login = useCallback(async (username, password, remember) => {
     const s = await apiLogin(username, password, remember);
@@ -28,7 +34,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, login, register, logout, refreshSession, isAdmin: checkAdmin(session) }}>
+    <AuthContext.Provider value={{ session, onboard, login, register, logout, refreshSession, isAdmin: checkAdmin(session) }}>
       {children}
     </AuthContext.Provider>
   );

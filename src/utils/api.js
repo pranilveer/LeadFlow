@@ -122,10 +122,27 @@ export function statusBadgeClass(status) {
   return map[status] || "badge--neutral";
 }
 
+function buildSession(data, remember) {
+  return {
+    userId: data.user.userId, username: data.user.username, role: data.user.role,
+    name: data.user.name, email: data.user.email, avatarColor: data.user.avatarColor,
+    loggedInAt: data.user.loggedInAt, remember: !!remember,
+    organization: data.user.organization, organizationName: data.user.organizationName,
+  };
+}
+
+export async function onboard(orgName, username, password, name, email) {
+  const data = await request("POST", "/api/auth/register", { orgName, username, password, name, email });
+  localStorage.setItem("leadflow_token", data.token);
+  const session = buildSession(data, false);
+  setSessionData(session);
+  return session;
+}
+
 export async function login(username, password, remember) {
   const data = await request("POST", "/api/auth/login", { username, password });
   localStorage.setItem("leadflow_token", data.token);
-  const session = { userId: data.user.userId, username: data.user.username, role: data.user.role, name: data.user.name, email: data.user.email, avatarColor: data.user.avatarColor, loggedInAt: data.user.loggedInAt, remember: !!remember };
+  const session = buildSession(data, remember);
   setSessionData(session);
   return session;
 }
@@ -133,7 +150,7 @@ export async function login(username, password, remember) {
 export async function register(username, password, name, email) {
   const data = await request("POST", "/api/auth/register", { username, password, name, email });
   localStorage.setItem("leadflow_token", data.token);
-  const session = { userId: data.user.userId, username: data.user.username, role: data.user.role, name: data.user.name, email: data.user.email, avatarColor: data.user.avatarColor, loggedInAt: data.user.loggedInAt, remember: false };
+  const session = buildSession(data, false);
   setSessionData(session);
   return session;
 }

@@ -90,11 +90,6 @@ export default function Layout({ activePage, children }) {
             <i className={`fa-solid ${sidebarCollapsed ? "fa-angles-right" : "fa-bars"}`}></i>
           </button>
 
-          <div className="navbar__search">
-            <i className="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-            <input type="search" placeholder={`Search ${activePage}…`} aria-label="Search" disabled />
-          </div>
-
           <div className="navbar__actions">
             <button type="button" className="btn btn--ghost btn--icon" onClick={toggleTheme} aria-label="Toggle theme">
               <i className={`fa-solid ${theme === "light" ? "fa-moon" : "fa-sun"}`}></i>

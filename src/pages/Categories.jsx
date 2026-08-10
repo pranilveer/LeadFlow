@@ -84,9 +84,9 @@ export default function Categories() {
               </div>
               <p className="category-card__desc">{escapeHtml(c.description || "No description.")}</p>
               <div className="category-card__actions" onClick={e => e.stopPropagation()}>
-                {isAdmin && <button type="button" className="btn btn--ghost btn--sm" onClick={() => openEdit(c)}><i className="fa-solid fa-pen"></i> Edit</button>}
+                {isAdmin && <button type="button" className="btn btn--ghost btn--sm" onClick={e => { e.preventDefault(); openEdit(c); }}><i className="fa-solid fa-pen"></i> Edit</button>}
                 {c.name !== "Other" && isAdmin && (
-                  <button type="button" className="btn btn--ghost btn--sm" style={{ color: "var(--red)" }} onClick={() => setDeleteTarget(c)}><i className="fa-solid fa-trash"></i> Delete</button>
+                  <button type="button" className="btn btn--ghost btn--sm" style={{ color: "var(--red)" }} onClick={e => { e.preventDefault(); setDeleteTarget(c); }}><i className="fa-solid fa-trash"></i> Delete</button>
                 )}
               </div>
             </Link>

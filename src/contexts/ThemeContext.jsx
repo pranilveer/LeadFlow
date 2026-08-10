@@ -22,7 +22,7 @@ export function ThemeProvider({ children }) {
     if (theme === "light") document.body.classList.add("light");
     else document.body.classList.remove("light");
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = theme === "light" ? "#EEF1F6" : "#0F1117";
+    if (meta) meta.content = theme === "light" ? "#F1EFF5" : "#1A1720";
   }, [theme]);
 
   return (

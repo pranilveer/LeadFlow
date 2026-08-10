@@ -128,7 +128,7 @@ export default function Join() {
 
       <header className="auth-topbar">
         <span className="brand brand--compact">
-          <span className="brand__mark" aria-hidden="true"><i className="fa-solid fa-bolt"></i></span>
+          <span className="brand__mark" aria-hidden="true"><i className="fa-solid fa-arrow-trend-up"></i></span>
           <span className="brand__text">
             <span className="brand__name">LeadFlow</span>
             <span className="brand__tag">CRM</span>

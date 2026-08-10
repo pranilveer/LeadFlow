@@ -55,7 +55,7 @@ export default function Layout({ activePage, children }) {
       <aside className={`sidebar ${sidebarCollapsed ? "sidebar--collapsed" : ""}`} aria-label="Main navigation">
         <div className="sidebar__header">
           <NavLink className="brand" to="/dashboard">
-            <span className="brand__mark"><i className="fa-solid fa-bolt"></i></span>
+            <span className="brand__mark"><i className="fa-solid fa-arrow-trend-up"></i></span>
             <span className="brand__text">
               <span className="brand__name">LeadFlow</span>
               <span className="brand__tag">CRM</span>

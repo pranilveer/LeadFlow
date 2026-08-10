@@ -232,7 +232,7 @@ export default function Users() {
       {/* Toolbar: Search, Filters & View Mode Toggle */}
       <div className="table-toolbar" style={{ marginBottom: "1.25rem", display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", gap: "0.75rem", flex: 1, minWidth: 0, flexWrap: "wrap" }}>
-          <div className="navbar__search" style={{ flex: 1, minWidth: 0 }}>
+          <div className="table-toolbar__search" style={{ flex: 1, minWidth: 0 }}>
             <i className="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
             <input
               type="search"
@@ -244,6 +244,7 @@ export default function Users() {
           </div>
 
           <FilterDropdown
+            className="filter-dropdown--toggle"
             label="All Roles"
             icon="fa-solid fa-shield-halved"
             options={[
@@ -338,6 +339,7 @@ export default function Users() {
                     </td>
                     <td>
                       <FilterDropdown
+                        className="filter-dropdown--toggle"
                         label="Role"
                         icon={u.role === "admin" ? "fa-solid fa-crown" : "fa-solid fa-user"}
                         options={[

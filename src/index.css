@@ -2278,34 +2278,23 @@ body.modal-active { overflow: hidden; }
 .stat-card__value { color: #fff; }
 .stat-card__meta { color: rgba(255, 255, 255, 0.85); }
 
-/* Lead cards (mobile) — palette by position */
-.lead-card { border-bottom-color: rgba(255, 255, 255, 0.2); }
-.lead-card:last-child { border-bottom: none; }
-.lead-card:nth-child(8n+1) { background: var(--card-teal); }
-.lead-card:nth-child(8n+2) { background: var(--card-mauve); }
-.lead-card:nth-child(8n+3) { background: var(--card-orchid); }
-.lead-card:nth-child(8n+4) { background: var(--card-violet); }
-.lead-card:nth-child(8n+5) { background: var(--card-slate); }
-.lead-card:nth-child(8n+6) { background: var(--card-coral); }
-.lead-card:nth-child(8n+7) { background: var(--card-rose); }
-.lead-card:nth-child(8n+8) { background: var(--card-blue); }
-.lead-card:hover { background: rgba(0, 0, 0, 0.1); }
-.lead-card__name { color: #fff; }
-.lead-card__business { color: rgba(255, 255, 255, 0.9); }
-.lead-card__meta { color: rgba(255, 255, 255, 0.9); }
-.lead-card__meta i { color: rgba(255, 255, 255, 0.85); }
+/* Lead cards (mobile) — normal panel background */
+.lead-card__name { color: var(--text); }
+.lead-card__business { color: var(--text-dim); }
+.lead-card__meta { color: var(--text-dim); }
+.lead-card__meta i { color: var(--text-faint); }
 .lead-card__actions .btn {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #fff;
+  background: var(--panel-2);
+  border-color: var(--border);
+  color: var(--text-dim);
 }
-.lead-card__actions .btn:hover { background: rgba(255, 255, 255, 0.3); color: #fff; }
-.lead-card__actions .btn[style*="red"] { color: #fff !important; }
+.lead-card__actions .btn:hover { background: var(--accent-dim); color: var(--accent); }
+.lead-card__actions .btn[style*="red"] { color: var(--danger) !important; }
 .lead-card .badge,
 .lead-card .category-badge {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.35);
-  color: #fff;
+  background: var(--panel-2);
+  border-color: var(--border);
+  color: var(--text-dim);
 }
 
 /* Demo accounts — palette by position */
@@ -2326,19 +2315,6 @@ body.modal-active { overflow: hidden; }
 .btn--primary:hover { background: var(--accent-hover); }
 
 /* Table header + zebra rows */
-.data-table th {
-  background: var(--table-header);
-  color: var(--table-header-text);
-  font-family: var(--font-table);
-  font-weight: 500;
-  border-bottom: 1px solid var(--table-header);
-}
-.data-table th:hover { color: var(--accent-light); }
-.data-table tbody tr:nth-child(even) { background: var(--table-stripe); }
-body.light .data-table tbody tr:nth-child(even) { background: var(--table-stripe); }
-.data-table tbody tr:nth-child(odd) { background: var(--table-stripe-odd); }
-.data-table tbody tr:hover { background: var(--accent-dim); }
-
 .users-table th {
   background: var(--table-header);
   color: var(--table-header-text);

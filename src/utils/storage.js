@@ -93,20 +93,20 @@ export function statusBadgeClass(status) {
 
 function defaultUsers() {
   return [
-    { id: "usr_admin", username: "Admin", password: "Admin@123", role: "admin", name: "Admin User", email: "admin@leadflow.io", phone: "+1 (555) 100-0001", title: "System Administrator", department: "Operations", bio: "Full access administrator for LeadFlow CRM.", avatarColor: "#60A5FA", createdAt: "2024-01-01T08:00:00.000Z", lastLogin: null },
-    { id: "usr_john", username: "John", password: "John@123", role: "user", name: "John Mitchell", email: "john@leadflow.io", phone: "+1 (555) 200-0002", title: "Sales Executive", department: "Sales", bio: "Focused on enterprise pipeline growth and client relationships.", avatarColor: "#34D399", createdAt: "2024-02-15T09:30:00.000Z", lastLogin: null },
+    { id: "usr_admin", username: "Admin", password: "Admin@123", role: "admin", name: "Admin User", email: "admin@leadflow.io", phone: "+1 (555) 100-0001", title: "System Administrator", department: "Operations", bio: "Full access administrator for LeadFlow CRM.", avatarColor: "#F0845D", createdAt: "2024-01-01T08:00:00.000Z", lastLogin: null },
+    { id: "usr_john", username: "John", password: "John@123", role: "user", name: "John Mitchell", email: "john@leadflow.io", phone: "+1 (555) 200-0002", title: "Sales Executive", department: "Sales", bio: "Focused on enterprise pipeline growth and client relationships.", avatarColor: "#24B04D", createdAt: "2024-02-15T09:30:00.000Z", lastLogin: null },
     { id: "usr_sarah", username: "Sarah", password: "Sarah@123", role: "user", name: "Sarah Chen", email: "sarah@leadflow.io", phone: "+1 (555) 300-0003", title: "Account Manager", department: "Sales", bio: "Manages mid-market accounts and inbound lead qualification.", avatarColor: "#C084FC", createdAt: "2024-03-01T10:00:00.000Z", lastLogin: null },
   ];
 }
 
 function defaultCategories() {
   return [
-    { id: "cat_tech", name: "Technology", color: "#60A5FA", description: "Software, IT services, and SaaS companies.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
-    { id: "cat_health", name: "Healthcare", color: "#34D399", description: "Hospitals, clinics, and health-tech providers.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
-    { id: "cat_finance", name: "Finance", color: "#FBBF24", description: "Banks, fintech, and financial advisory firms.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
-    { id: "cat_retail", name: "Retail", color: "#F87171", description: "E-commerce and brick-and-mortar retail.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
-    { id: "cat_edu", name: "Education", color: "#C084FC", description: "Schools, universities, and ed-tech platforms.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
-    { id: "cat_other", name: "Other", color: "#9AA3B5", description: "Miscellaneous or uncategorized leads.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
+    { id: "cat_tech", name: "Technology", color: "#F0845D", description: "Software, IT services, and SaaS companies.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
+    { id: "cat_health", name: "Healthcare", color: "#7AB2B2", description: "Hospitals, clinics, and health-tech providers.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
+    { id: "cat_finance", name: "Finance", color: "#5B8DEF", description: "Banks, fintech, and financial advisory firms.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
+    { id: "cat_retail", name: "Retail", color: "#B48180", description: "E-commerce and brick-and-mortar retail.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
+    { id: "cat_edu", name: "Education", color: "#6B46C1", description: "Schools, universities, and ed-tech platforms.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
+    { id: "cat_other", name: "Other", color: "#8C8795", description: "Miscellaneous or uncategorized leads.", createdAt: "2024-01-01T08:00:00.000Z", leadCount: 0 },
   ];
 }
 
@@ -253,7 +253,7 @@ export function saveCategories(categories) { write(KEYS.CATEGORIES, categories);
 export function addCategory(data, session) {
   const categories = getCategories();
   if (categories.some(c => c.name.toLowerCase() === data.name.toLowerCase())) return { error: "Category name already exists." };
-  const cat = { id: uid("cat"), name: data.name.trim(), color: data.color || "#60A5FA", description: data.description || "", createdAt: new Date().toISOString(), leadCount: 0 };
+  const cat = { id: uid("cat"), name: data.name.trim(), color: data.color || "#F0845D", description: data.description || "", createdAt: new Date().toISOString(), leadCount: 0 };
   categories.push(cat);
   saveCategories(categories);
   logActivity("category", `Category "${cat.name}" created.`, session.username);

@@ -7,7 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { getCategories, addCategory, updateCategory, deleteCategory, escapeHtml } from "../utils/api";
 
-const SWATCHES = ["#60A5FA", "#34D399", "#FBBF24", "#F87171", "#C084FC", "#9AA3B5"];
+const SWATCHES = ["#7AB2B2", "#726988", "#B17AB2", "#6B46C1", "#8C8795", "#F0845D", "#B48180", "#5B8DEF"];
 
 export default function Categories() {
   const { session, isAdmin } = useAuth();
@@ -24,7 +24,7 @@ export default function Categories() {
   const [editId, setEditId] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedColor, setSelectedColor] = useState("#60A5FA");
+  const [selectedColor, setSelectedColor] = useState("#F0845D");
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const refresh = useCallback(() => setRenderKey(k => k + 1), []);
@@ -47,7 +47,7 @@ export default function Categories() {
 
   useEffect(() => { setPage(1); }, [searchQuery, filterLeads, pageSize]);
 
-  const openAdd = () => { setEditId(""); setName(""); setDescription(""); setSelectedColor("#60A5FA"); setModalOpen(true); };
+  const openAdd = () => { setEditId(""); setName(""); setDescription(""); setSelectedColor("#F0845D"); setModalOpen(true); };
   const openEdit = (cat) => { setEditId(cat._id || cat.id); setName(cat.name); setDescription(cat.description || ""); setSelectedColor(cat.color); setModalOpen(true); };
 
   const save = async () => {

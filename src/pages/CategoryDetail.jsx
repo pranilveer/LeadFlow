@@ -132,7 +132,7 @@ export default function CategoryDetail() {
           ) : projects.length === 0 ? (
             <div className="table-empty"><i className="fa-solid fa-folder-open"></i> No projects yet.</div>
           ) : (
-            <div style={{ display: "grid", gap: "0.75rem" }}>
+            <div className="category-detail-list" style={{ display: "grid", gap: "0.75rem" }}>
               {projects.map(p => (
                 <div key={p._id} className="category-card" style={{ padding: "1rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>

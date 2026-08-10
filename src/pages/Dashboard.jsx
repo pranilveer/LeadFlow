@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [filterOwner, setFilterOwner] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [sortKey, setSortKey] = useState("addedDate");
   const [sortDir, setSortDir] = useState("desc");
 
@@ -364,39 +365,44 @@ export default function Dashboard() {
           <h2 className="panel-card__title"><i className="fa-solid fa-table"></i> Leads</h2>
         </div>
         <div className="panel-card__body" style={{ padding: 0 }}>
-          <div className="table-toolbar" style={{ padding: "1rem 1.35rem 0" }}>
-            <div className="table-toolbar__search">
-              <i className="fa-solid fa-magnifying-glass"></i>
-              <input type="search" placeholder="Search leads…" aria-label="Search leads table" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          <div className="table-toolbar dashboard-toolbar" style={{ padding: "1rem 1.35rem 0" }}>
+            <button type="button" className="btn btn--ghost btn--sm filters-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(o => !o)}>
+              <i className={`fa-solid ${filtersOpen ? "fa-xmark" : "fa-sliders"}`}></i> {filtersOpen ? "Hide Filters" : "Filters"}
+            </button>
+            <div className={`filters-toggle__body ${filtersOpen ? "filters-toggle__body--open" : ""}`}>
+              <div className="table-toolbar__search">
+                <i className="fa-solid fa-magnifying-glass"></i>
+                <input type="search" placeholder="Search leads…" aria-label="Search leads table" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+              </div>
+              <FilterDropdown
+                label="All Statuses"
+                icon="fa-solid fa-circle-dot"
+                options={[{ value: "", label: "All Statuses" }, ...LEAD_STATUSES.map(s => ({ value: s, label: s }))]}
+                value={filterStatus}
+                onChange={setFilterStatus}
+              />
+              <FilterDropdown
+                label="All Categories"
+                icon="fa-solid fa-tag"
+                options={[{ value: "", label: "All Categories" }, ...categories.map(c => ({ value: c.name, label: c.name }))]}
+                value={filterCategory}
+                onChange={setFilterCategory}
+              />
+              <FilterDropdown
+                label="All Owners"
+                icon="fa-solid fa-user"
+                options={[{ value: "", label: "All Owners" }, ...uniqueOwners.map(o => ({ value: o, label: o }))]}
+                value={filterOwner}
+                onChange={setFilterOwner}
+              />
+              <FilterDropdown
+                label="Rows"
+                icon="fa-solid fa-list"
+                options={[{ value: "10", label: "10 / page" }, { value: "25", label: "25 / page" }, { value: "50", label: "50 / page" }]}
+                value={String(pageSize)}
+                onChange={(v) => setPageSize(Number(v))}
+              />
             </div>
-            <FilterDropdown
-              label="All Statuses"
-              icon="fa-solid fa-circle-dot"
-              options={[{ value: "", label: "All Statuses" }, ...LEAD_STATUSES.map(s => ({ value: s, label: s }))]}
-              value={filterStatus}
-              onChange={setFilterStatus}
-            />
-            <FilterDropdown
-              label="All Categories"
-              icon="fa-solid fa-tag"
-              options={[{ value: "", label: "All Categories" }, ...categories.map(c => ({ value: c.name, label: c.name }))]}
-              value={filterCategory}
-              onChange={setFilterCategory}
-            />
-            <FilterDropdown
-              label="All Owners"
-              icon="fa-solid fa-user"
-              options={[{ value: "", label: "All Owners" }, ...uniqueOwners.map(o => ({ value: o, label: o }))]}
-              value={filterOwner}
-              onChange={setFilterOwner}
-            />
-            <FilterDropdown
-              label="Rows"
-              icon="fa-solid fa-list"
-              options={[{ value: "10", label: "10 / page" }, { value: "25", label: "25 / page" }, { value: "50", label: "50 / page" }]}
-              value={String(pageSize)}
-              onChange={(v) => setPageSize(Number(v))}
-            />
           </div>
           <div className="table-wrap leads-desktop-table" style={{ border: "none", borderRadius: 0 }}>
             <table className="data-table" aria-label="Leads data grid">

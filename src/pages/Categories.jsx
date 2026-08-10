@@ -19,6 +19,7 @@ export default function Categories() {
   const [filterLeads, setFilterLeads] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState("");
   const [name, setName] = useState("");
@@ -87,25 +88,30 @@ export default function Categories() {
       ) : (
         <>
           <div className="table-toolbar categories-toolbar">
-            <div className="table-toolbar__search">
-              <i className="fa-solid fa-magnifying-glass"></i>
-              <input type="search" placeholder="Search categories…" aria-label="Search categories" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            </div>
-            <div className="table-toolbar__filters">
-              <FilterDropdown
-                label="Any Leads"
-                icon="fa-solid fa-chart-simple"
-                options={[{ value: "", label: "Any Leads" }, { value: "with", label: "With Leads" }, { value: "empty", label: "No Leads" }]}
-                value={filterLeads}
-                onChange={setFilterLeads}
-              />
-              <FilterDropdown
-                label="Rows"
-                icon="fa-solid fa-list"
-                options={[{ value: "10", label: "10 / page" }, { value: "25", label: "25 / page" }, { value: "50", label: "50 / page" }]}
-                value={String(pageSize)}
-                onChange={(v) => setPageSize(Number(v))}
-              />
+            <button type="button" className="btn btn--ghost btn--sm filters-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(o => !o)}>
+              <i className={`fa-solid ${filtersOpen ? "fa-xmark" : "fa-sliders"}`}></i> {filtersOpen ? "Hide Filters" : "Filters"}
+            </button>
+            <div className={`filters-toggle__body ${filtersOpen ? "filters-toggle__body--open" : ""}`}>
+              <div className="table-toolbar__search">
+                <i className="fa-solid fa-magnifying-glass"></i>
+                <input type="search" placeholder="Search categories…" aria-label="Search categories" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+              </div>
+              <div className="table-toolbar__filters">
+                <FilterDropdown
+                  label="Any Leads"
+                  icon="fa-solid fa-chart-simple"
+                  options={[{ value: "", label: "Any Leads" }, { value: "with", label: "With Leads" }, { value: "empty", label: "No Leads" }]}
+                  value={filterLeads}
+                  onChange={setFilterLeads}
+                />
+                <FilterDropdown
+                  label="Rows"
+                  icon="fa-solid fa-list"
+                  options={[{ value: "10", label: "10 / page" }, { value: "25", label: "25 / page" }, { value: "50", label: "50 / page" }]}
+                  value={String(pageSize)}
+                  onChange={(v) => setPageSize(Number(v))}
+                />
+              </div>
             </div>
           </div>
 

@@ -177,6 +177,13 @@ export default function Onboarding() {
       </main>
 
       <footer className="auth-footer">
+        <div className="auth-social">
+          <a href="https://github.com/pranilveer" aria-label="GitHub"><i className="fa-brands fa-github" aria-hidden="true"></i></a>
+          <a href="https://x.com/pranilveer" aria-label="X (Twitter)"><i className="fa-brands fa-x-twitter" aria-hidden="true"></i></a>
+          <a href="https://linkedin.com/in/pranilveer" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
+          <a href="https://instagram.com/veerpranil" aria-label="Instagram"><i className="fa-brands fa-instagram" aria-hidden="true"></i></a>
+          <a href="https://youtube.com/@veerpranil" aria-label="YouTube"><i className="fa-brands fa-youtube" aria-hidden="true"></i></a>
+        </div>
         <p>&copy; {new Date().getFullYear()} LeadFlow CRM. Production-ready with Node.js backend.</p>
       </footer>
     </div>

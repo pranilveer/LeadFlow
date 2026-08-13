@@ -275,11 +275,6 @@ export default function Dashboard() {
     showToast(`CSV exported (${filteredLeads.length} leads).`, "success");
   };
 
-  const exportJSON = () => {
-    downloadFile(JSON.stringify(filteredLeads, null, 2), `leadflow-leads-${formatISODate(new Date())}.json`, "application/json");
-    showToast(`JSON exported (${filteredLeads.length} leads).`, "success");
-  };
-
   const exportPDF = async () => {
     try {
       await leadsToPDF(filteredLeads, { title: "LeadFlow CRM \u2014 Leads Export" });
@@ -329,15 +324,8 @@ export default function Dashboard() {
                 <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); exportCSV(); }}>
                   <i className="fa-solid fa-file-csv"></i> Export CSV
                 </button>
-                <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); exportJSON(); }}>
-                  <i className="fa-solid fa-file-code"></i> Export JSON
-                </button>
                 <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); exportPDF(); }}>
                   <i className="fa-solid fa-file-pdf"></i> Export PDF
-                </button>
-                <div className="actions-dropdown__divider"></div>
-                <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); window.print(); }}>
-                  <i className="fa-solid fa-print"></i> Print
                 </button>
               </div>
             )}

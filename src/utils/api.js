@@ -308,7 +308,7 @@ export function categoryColor(name, categories) {
 }
 
 export function leadsToCSV(leads) {
-  const headers = ["ID", "Lead Name", "Business Name", "Email", "Phone", "Website", "Category", "Custom Category", "City", "State", "Country", "Address", "Description", "Lead Source", "Lead Status", "Added Date", "Added Time", "Added By"];
+  const headers = ["ID", "Owner Name", "Business Name", "Email", "Phone", "Website", "Category", "Custom Category", "City", "State", "Country", "Address", "Description", "Lead Source", "Lead Status", "Added Date", "Added Time", "Added By"];
   const rows = leads.map(l => {
     return [l.id, l.leadName, l.businessName, l.email, l.phone, l.website, l.category, l.customCategory, l.city, l.state, l.country, l.address, l.description, l.leadSource, l.leadStatus, l.addedDate, l.addedTime, l.addedBy].map(v => {
       v = v == null ? "" : String(v);
@@ -329,7 +329,7 @@ export function parseCSV(text) {
     if (vals.length < 2) continue;
     const obj = {};
     headers.forEach((h, idx) => { obj[h.trim().toLowerCase().replace(/\s+/g, "")] = vals[idx] || ""; });
-    leads.push({ leadName: obj.leadname || obj.name || "", businessName: obj.businessname || "", email: obj.email || "", phone: obj.phone || "", website: obj.website || "", category: obj.category || "Other", customCategory: obj.customcategory || "", city: obj.city || "", state: obj.state || "", country: obj.country || "", address: obj.address || "", description: obj.description || "", leadSource: obj.leadsource || "Website", leadStatus: obj.leadstatus || "New" });
+    leads.push({ leadName: obj.ownername || obj.leadname || obj.name || "", businessName: obj.businessname || "", email: obj.email || "", phone: obj.phone || "", website: obj.website || "", category: obj.category || "Other", customCategory: obj.customcategory || "", city: obj.city || "", state: obj.state || "", country: obj.country || "", address: obj.address || "", description: obj.description || "", leadSource: obj.leadsource || "Website", leadStatus: obj.leadstatus || "New" });
   }
   return leads;
 }

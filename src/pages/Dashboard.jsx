@@ -3,6 +3,7 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import FilterDropdown from "../components/FilterDropdown";
 import LocationCombobox from "../components/LocationCombobox";
+import RowActions from "../components/RowActions";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import {
@@ -579,9 +580,11 @@ export default function Dashboard() {
                       <td>{l.addedBy}</td>
                       <td>{l.addedDate}</td>
                       <td><div className="table-actions">
-                        <button type="button" className="btn btn--ghost btn--sm" title="View" onClick={() => setViewLead(l)}><i className="fa-solid fa-eye"></i></button>
-                        <button type="button" className="btn btn--ghost btn--sm" title="Edit" onClick={() => openEditForm(l)}><i className="fa-solid fa-pen"></i></button>
-                        <button type="button" className="btn btn--ghost btn--sm" title="Delete" style={{ color: "var(--red)" }} onClick={() => setDeleteTarget(l)}><i className="fa-solid fa-trash"></i></button>
+                        <RowActions items={[
+                          { icon: "fa-eye", label: "View", onClick: () => setViewLead(l) },
+                          { icon: "fa-pen", label: "Edit", onClick: () => openEditForm(l) },
+                          { icon: "fa-trash", label: "Delete", danger: true, onClick: () => setDeleteTarget(l) },
+                        ]} />
                       </div></td>
                     </tr>
                   );

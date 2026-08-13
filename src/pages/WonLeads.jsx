@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import FilterDropdown from "../components/FilterDropdown";
+import RowActions from "../components/RowActions";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import {
@@ -179,8 +180,10 @@ export default function WonLeads() {
                       <td>{l.addedBy}</td>
                       <td>{l.addedDate}</td>
                       <td><div className="table-actions">
-                        <button type="button" className="btn btn--ghost btn--sm" title="View" onClick={() => setViewLead(l)}><i className="fa-solid fa-eye"></i></button>
-                        <button type="button" className="btn btn--ghost btn--sm" title="Remove from Won" style={{ color: "var(--red)" }} onClick={() => setRemoveTarget(l)}><i className="fa-solid fa-xmark"></i></button>
+                        <RowActions items={[
+                          { icon: "fa-eye", label: "View", onClick: () => setViewLead(l) },
+                          { icon: "fa-xmark", label: "Remove from Won", danger: true, onClick: () => setRemoveTarget(l) },
+                        ]} />
                       </div></td>
                     </tr>
                   );

@@ -997,6 +997,12 @@ body.light ::-webkit-scrollbar-thumb:hover {
 
 .actions-dropdown__divider { height: 1px; background: var(--border); margin: 0.25rem 0; }
 
+.row-actions__toggle { padding: 0.35rem 0.6rem; font-size: 0.9rem; }
+.row-actions__item--danger { color: var(--red); }
+.row-actions__item--danger i { color: var(--red); }
+.row-actions__item--danger:hover { background: color-mix(in srgb, var(--red) 12%, transparent); color: var(--red); }
+.row-actions__item--danger:hover i { color: var(--red); }
+
 .sidebar-overlay {
   display: none;
   position: fixed;

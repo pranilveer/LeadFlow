@@ -2153,6 +2153,188 @@ body.modal-active { overflow: hidden; }
 .filter-dropdown__menu::-webkit-scrollbar-track { background: transparent; }
 .filter-dropdown__menu::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
+/* ─── Location combobox (country / state / city) ───────────────── */
+.location-combobox { position: relative; }
+
+.location-combobox__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  min-height: 39px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  user-select: none;
+}
+
+.location-combobox__trigger:hover { border-color: var(--accent); }
+
+.location-combobox__trigger:focus-visible,
+.location-combobox__trigger--open {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.location-combobox__trigger--placeholder { color: var(--text-faint); }
+.location-combobox__trigger--disabled { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+.location-combobox__value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.location-combobox__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.location-combobox__flag { font-size: 0.95rem; line-height: 1; flex-shrink: 0; }
+
+.location-combobox__end {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.location-combobox__chevron {
+  font-size: 0.65rem;
+  color: var(--text-faint);
+  transition: transform 200ms ease;
+}
+
+.location-combobox__chevron--open { transform: rotate(180deg); }
+
+.location-combobox__spinner { font-size: 0.7rem; color: var(--text-faint); }
+
+.location-combobox__clear {
+  border: none;
+  background: none;
+  color: var(--text-faint);
+  padding: 0.2rem 0.35rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.location-combobox__clear:hover { color: var(--red); background: var(--panel); }
+
+.location-combobox__menu {
+  position: fixed;
+  z-index: 600;
+  min-width: 220px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  animation: fadeSlideDown 150ms ease;
+}
+
+.location-combobox__search {
+  position: relative;
+  padding: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.location-combobox__search i {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-faint);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.location-combobox__search input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2rem;
+  font-size: 0.8125rem;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+}
+
+.location-combobox__search input::placeholder { color: var(--text-faint); }
+
+.location-combobox__search input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.location-combobox__list {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 0.3rem;
+}
+
+.location-combobox__option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.8125rem;
+  color: var(--text-dim);
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.location-combobox__option:hover,
+.location-combobox__option--highlight {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.location-combobox__option--selected {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.location-combobox__optlabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.location-combobox__status,
+.location-combobox__more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.location-combobox__more { font-size: 0.72rem; padding: 0.5rem; }
+
+.location-combobox__list::-webkit-scrollbar { width: 6px; }
+.location-combobox__list::-webkit-scrollbar-track { background: transparent; }
+.location-combobox__list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
 /* ─── Leads mobile cards ───────────────────────────────────────── */
 .leads-cards {
   display: none;

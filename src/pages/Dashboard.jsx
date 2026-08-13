@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import FilterDropdown from "../components/FilterDropdown";
+import LocationCombobox from "../components/LocationCombobox";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import {
@@ -11,6 +12,10 @@ import {
   leadsToCSV, parseCSV, downloadFile, formatISODate,
   getSettings, formatDisplayDateTime
 } from "../utils/api";
+import {
+  flagEmoji, getCountries, getStatesOfCountry, getCountryByName,
+  getStateByCountryAndName, loadCities
+} from "../utils/locationData";
 
 export default function Dashboard() {
   const { session } = useAuth();
@@ -37,6 +42,17 @@ export default function Dashboard() {
   const [actionsOpen, setActionsOpen] = useState(false);
   const [editLead, setEditLead] = useState(null);
   const [form, setForm] = useState({ leadName: "", businessName: "", email: "", phone: "", website: "", category: "Technology", customCategory: "", city: "", state: "", country: "", address: "", description: "", leadSource: "Website", leadStatus: "New" });
+
+  const [countryCode, setCountryCode] = useState("");
+  const [stateCode, setStateCode] = useState("");
+  const [stateOptions, setStateOptions] = useState([]);
+  const [cityOptions, setCityOptions] = useState([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
+
+  const countryOptions = useMemo(
+    () => getCountries().map(c => ({ value: c.isoCode, label: c.name, flag: flagEmoji(c.isoCode) })),
+    []
+  );
 
   const [viewLead, setViewLead] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -106,17 +122,90 @@ export default function Dashboard() {
     return () => document.removeEventListener("mousedown", close);
   }, [actionsOpen]);
 
+  useEffect(() => {
+    if (!countryCode) {
+      setStateOptions([]);
+      setCityOptions([]);
+      return;
+    }
+    setStateOptions(getStatesOfCountry(countryCode).map(s => ({ value: s.isoCode, label: s.name })));
+  }, [countryCode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!countryCode) {
+      setCityOptions([]);
+      setCitiesLoading(false);
+      return;
+    }
+    const hasStates = getStatesOfCountry(countryCode).length > 0;
+    if (hasStates && !stateCode) {
+      setCityOptions([]);
+      setCitiesLoading(false);
+      return;
+    }
+    setCitiesLoading(true);
+    loadCities(countryCode, stateCode)
+      .then(names => { if (!cancelled) setCityOptions(names.map(n => ({ value: n, label: n }))); })
+      .catch(() => { if (!cancelled) setCityOptions([]); })
+      .finally(() => { if (!cancelled) setCitiesLoading(false); });
+    return () => { cancelled = true; };
+  }, [countryCode, stateCode]);
+
   const openAddForm = () => {
     setEditLead(null);
-    setForm({ leadName: "", businessName: "", email: "", phone: "", website: "", category: categories[0]?.name || "Technology", customCategory: "", city: "", state: "", country: "", address: "", description: "", leadSource: settings.defaultLeadSource || "Website", leadStatus: settings.defaultLeadStatus || "New" });
+    setCountryCode("IN");
+    setStateCode("MH");
+    setForm({ leadName: "", businessName: "", email: "", phone: "", website: "", category: categories[0]?.name || "Technology", customCategory: "", city: "", state: "Maharashtra", country: "India", address: "", description: "", leadSource: settings.defaultLeadSource || "Website", leadStatus: settings.defaultLeadStatus || "New" });
     setFormOpen(true);
   };
 
   const openEditForm = (lead) => {
     setEditLead(lead);
+    const country = getCountryByName(lead.country || "");
+    const cCode = country ? country.isoCode : "";
+    const sCode = cCode ? getStateByCountryAndName(cCode, lead.state)?.isoCode || "" : "";
+    setCountryCode(cCode);
+    setStateCode(sCode);
     setForm({ leadName: lead.leadName, businessName: lead.businessName, email: lead.email, phone: lead.phone || "", website: lead.website || "", category: lead.category, customCategory: lead.customCategory || "", city: lead.city || "", state: lead.state || "", country: lead.country || "", address: lead.address || "", description: lead.description || "", leadSource: lead.leadSource, leadStatus: lead.leadStatus });
     setFormOpen(true);
   };
+
+  const handleCountrySelect = (opt) => {
+    if (!opt) {
+      setCountryCode("");
+      setStateCode("");
+      setForm(f => ({ ...f, country: "", state: "", city: "" }));
+      return;
+    }
+    setCountryCode(opt.value);
+    setStateCode("");
+    setForm(f => ({ ...f, country: opt.label, state: "", city: "" }));
+  };
+
+  const handleStateSelect = (opt) => {
+    if (!opt) {
+      setStateCode("");
+      setForm(f => ({ ...f, state: "", city: "" }));
+      return;
+    }
+    setStateCode(opt.value);
+    setForm(f => ({ ...f, state: opt.label, city: "" }));
+  };
+
+  const handleCitySelect = (opt) => {
+    setForm(f => ({ ...f, city: opt ? opt.label : "" }));
+  };
+
+  const selectedCountry = countryCode
+    ? countryOptions.find(o => o.value === countryCode) || { value: countryCode, label: form.country }
+    : (form.country ? { value: "__unknown", label: form.country } : null);
+
+  const selectedState = stateCode
+    ? stateOptions.find(o => o.value === stateCode) || { value: stateCode, label: form.state }
+    : (form.state ? { value: "__unknown", label: form.state } : null);
+
+  const selectedCity = form.city ? { value: form.city, label: form.city } : null;
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -317,16 +406,38 @@ export default function Dashboard() {
               </div>
             )}
             <div className="form-field">
-              <label className="form-label" htmlFor="city">City</label>
-              <input className="form-input" type="text" id="city" placeholder="City" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} />
+              <LocationCombobox
+                label="Country"
+                value={selectedCountry}
+                options={countryOptions}
+                onSelect={handleCountrySelect}
+                placeholder="Select country"
+                searchPlaceholder="Search countries\u2026"
+              />
             </div>
             <div className="form-field">
-              <label className="form-label" htmlFor="state">State</label>
-              <input className="form-input" type="text" id="state" placeholder="State / Province" value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} />
+              <LocationCombobox
+                label="State / Province"
+                value={selectedState}
+                options={stateOptions}
+                onSelect={handleStateSelect}
+                placeholder={countryCode ? "Select state" : "Select country first"}
+                searchPlaceholder="Search states\u2026"
+                disabled={!countryCode}
+              />
             </div>
             <div className="form-field">
-              <label className="form-label" htmlFor="country">Country</label>
-              <input className="form-input" type="text" id="country" placeholder="Country" value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} />
+              <LocationCombobox
+                label="City"
+                value={selectedCity}
+                options={cityOptions}
+                onSelect={handleCitySelect}
+                placeholder={countryCode ? "Select city" : "Select country first"}
+                searchPlaceholder="Search cities\u2026"
+                disabled={!countryCode}
+                loading={citiesLoading}
+                loadingText="Loading cities\u2026"
+              />
             </div>
             <div className="form-field">
               <label className="form-label" htmlFor="leadSource">Lead Source</label>

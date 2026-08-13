@@ -10,7 +10,7 @@ import {
   getLeads, getLeadStats, addLead, updateLead, deleteLead,
   getCategories, importLeads, categoryColor, statusBadgeClass, escapeHtml,
   LEAD_STATUSES, LEAD_SOURCES, animateCounter, copyToClipboard,
-  leadsToCSV, parseCSV, downloadFile, formatISODate,
+  leadsToCSV, leadsToPDF, parseCSV, downloadFile, formatISODate,
   getSettings, formatDisplayDateTime
 } from "../utils/api";
 import {
@@ -280,6 +280,15 @@ export default function Dashboard() {
     showToast(`JSON exported (${filteredLeads.length} leads).`, "success");
   };
 
+  const exportPDF = async () => {
+    try {
+      await leadsToPDF(filteredLeads, { title: "LeadFlow CRM \u2014 Leads Export" });
+      showToast(`PDF exported (${filteredLeads.length} leads).`, "success");
+    } catch (err) {
+      showToast(err.message || "PDF export failed.", "error");
+    }
+  };
+
   const handleSort = (key) => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("asc"); }
@@ -322,6 +331,9 @@ export default function Dashboard() {
                 </button>
                 <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); exportJSON(); }}>
                   <i className="fa-solid fa-file-code"></i> Export JSON
+                </button>
+                <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); exportPDF(); }}>
+                  <i className="fa-solid fa-file-pdf"></i> Export PDF
                 </button>
                 <div className="actions-dropdown__divider"></div>
                 <button type="button" className="actions-dropdown__item" onClick={() => { setActionsOpen(false); window.print(); }}>

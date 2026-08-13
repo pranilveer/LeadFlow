@@ -556,7 +556,7 @@ export default function Dashboard() {
                   <th onClick={() => handleSort("category")} className={sortKey === "category" ? "sorted" : ""}>Category <i className={`fa-solid sort-icon ${sortIcon("category")}`}></i></th>
                   <th onClick={() => handleSort("leadStatus")} className={sortKey === "leadStatus" ? "sorted" : ""}>Status <i className={`fa-solid sort-icon ${sortIcon("leadStatus")}`}></i></th>
                   <th>Source</th>
-                  <th>Added By</th>
+                  {isAdmin && <th>Added By</th>}
                   <th onClick={() => handleSort("addedDate")} className={sortKey === "addedDate" ? "sorted" : ""}>Date <i className={`fa-solid sort-icon ${sortIcon("addedDate")}`}></i></th>
                   <th>Actions</th>
                 </tr>
@@ -577,7 +577,7 @@ export default function Dashboard() {
                       <td><span className="category-badge" style={{ background: catColor + "18", color: catColor, borderColor: catColor + "30" }}><span className="category-badge__dot" style={{ background: catColor }}></span>{catDisplay}</span></td>
                       <td><span className={`badge ${statusBadgeClass(l.leadStatus)}`}>{l.leadStatus}</span></td>
                       <td>{l.leadSource}</td>
-                      <td>{l.addedBy}</td>
+                      {isAdmin && <td>{l.addedBy}</td>}
                       <td>{l.addedDate}</td>
                       <td><div className="table-actions">
                         <RowActions items={[

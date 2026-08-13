@@ -178,7 +178,7 @@ export default function CategoryDetail() {
                     <th>Email</th>
                     <th>Status</th>
                     <th>Source</th>
-                    <th>Added By</th>
+                    {isAdmin && <th>Added By</th>}
                     <th>Date</th>
                   </tr>
                 </thead>
@@ -191,7 +191,7 @@ export default function CategoryDetail() {
                       <td>{l.email || "\u2014"}</td>
                       <td><span className={`badge ${statusBadgeClass(l.leadStatus)}`}>{l.leadStatus}</span></td>
                       <td>{l.leadSource}</td>
-                      <td>{l.addedBy}</td>
+                      {isAdmin && <td>{l.addedBy}</td>}
                       <td>{l.addedDate}</td>
                     </tr>
                   ))}

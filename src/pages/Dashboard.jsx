@@ -394,10 +394,16 @@ export default function Dashboard() {
               <input className="form-input" type="url" id="website" placeholder="https://example.com" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} />
             </div>
             <div className="form-field">
-              <label className="form-label" htmlFor="category">Category <span className="form-label__required">*</span></label>
-              <select className="form-select" id="category" required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-                {categories.map(c => <option key={c._id || c.id} value={c.name}>{c.name}</option>)}
-              </select>
+              <LocationCombobox
+                label="Category"
+                value={form.category ? { value: form.category, label: form.category } : null}
+                options={categories.map(c => ({ value: c.name, label: c.name }))}
+                onSelect={(opt) => setForm({ ...form, category: opt ? opt.label : "" })}
+                placeholder="Select category"
+                searchable={false}
+                clearable={false}
+                required
+              />
             </div>
             {form.category === "Other" && (
               <div className="form-field">
@@ -440,16 +446,26 @@ export default function Dashboard() {
               />
             </div>
             <div className="form-field">
-              <label className="form-label" htmlFor="leadSource">Lead Source</label>
-              <select className="form-select" id="leadSource" value={form.leadSource} onChange={e => setForm({ ...form, leadSource: e.target.value })}>
-                {LEAD_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <LocationCombobox
+                label="Lead Source"
+                value={form.leadSource ? { value: form.leadSource, label: form.leadSource } : null}
+                options={LEAD_SOURCES.map(s => ({ value: s, label: s }))}
+                onSelect={(opt) => setForm({ ...form, leadSource: opt ? opt.label : "" })}
+                placeholder="Select lead source"
+                searchable={false}
+                clearable={false}
+              />
             </div>
             <div className="form-field">
-              <label className="form-label" htmlFor="leadStatus">Lead Status</label>
-              <select className="form-select" id="leadStatus" value={form.leadStatus} onChange={e => setForm({ ...form, leadStatus: e.target.value })}>
-                {LEAD_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <LocationCombobox
+                label="Lead Status"
+                value={form.leadStatus ? { value: form.leadStatus, label: form.leadStatus } : null}
+                options={LEAD_STATUSES.map(s => ({ value: s, label: s }))}
+                onSelect={(opt) => setForm({ ...form, leadStatus: opt ? opt.label : "" })}
+                placeholder="Select lead status"
+                searchable={false}
+                clearable={false}
+              />
             </div>
           </div>
           <div className="form-field">

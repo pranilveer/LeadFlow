@@ -13,6 +13,7 @@ export default function LocationCombobox({
   disabled = false,
   required = false,
   clearable = true,
+  searchable = true,
   loading = false,
   loadingText = "Loading\u2026",
   emptyText = "No matching options found.",
@@ -43,10 +44,12 @@ export default function LocationCombobox({
     setQuery("");
     setCount(PAGE);
     setHighlight(-1);
-    requestAnimationFrame(() => {
-      if (searchRef.current) searchRef.current.focus();
-    });
-  }, [open]);
+    if (searchable) {
+      requestAnimationFrame(() => {
+        if (searchRef.current) searchRef.current.focus();
+      });
+    }
+  }, [open, searchable]);
 
   useEffect(() => {
     setHighlight(-1);
@@ -129,10 +132,19 @@ export default function LocationCombobox({
     if (disabled) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      setOpen(true);
+      if (open && !searchable) {
+        const idx = highlight >= 0 && highlight < filtered.length ? highlight : 0;
+        if (filtered[idx]) select(filtered[idx]);
+      } else {
+        setOpen(true);
+      }
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      setOpen(true);
+      if (!open) setOpen(true);
+      else moveHighlight(highlight + 1);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (open) moveHighlight(highlight - 1);
     } else if (e.key === "Escape") {
       setOpen(false);
     }
@@ -190,19 +202,20 @@ export default function LocationCombobox({
       </div>
       {open && createPortal(
         <div className="location-combobox__menu" ref={menuRef} role="listbox" id={listId}>
-          <div className="location-combobox__search">
-            <i className="fa-solid fa-magnifying-glass"></i>
-            <input
-              ref={searchRef}
-              type="text"
-              value={query}
-              onChange={(e) => { setQuery(e.target.value); setCount(PAGE); setHighlight(-1); }}
-              onKeyDown={onSearchKeyDown}
-              placeholder={searchPlaceholder}
-              aria-label="Search"
-            />
-          </div>
-          <div className="location-combobox__list" ref={listRef} onScroll={onListScroll}>
+          {searchable && (
+            <div className="location-combobox__search">
+              <i className="fa-solid fa-magnifying-glass"></i>
+              <input
+                ref={searchRef}
+                type="text"
+                value={query}
+                onChange={(e) => { setQuery(e.target.value); setCount(PAGE); setHighlight(-1); }}
+                onKeyDown={onSearchKeyDown}
+                placeholder={searchPlaceholder}
+                aria-label="Search"
+              />
+            </div>
+          )}          <div className="location-combobox__list" ref={listRef} onScroll={onListScroll}>
             {loading && filtered.length === 0 ? (
               <div className="location-combobox__status">
                 <i className="fa-solid fa-spinner fa-spin"></i>{loadingText}

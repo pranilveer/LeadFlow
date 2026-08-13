@@ -36,6 +36,7 @@ export default function Layout({ activePage, children }) {
 
   const navItems = [
     { to: "/dashboard", icon: "fa-gauge-high", label: "Dashboard", page: "dashboard" },
+    { to: "/won", icon: "fa-trophy", label: "Won Leads", page: "won", adminOnly: true },
     { to: "/categories", icon: "fa-tags", label: "Categories", page: "categories" },
     { to: "/users", icon: "fa-users", label: "Users", page: "users", adminOnly: true },
     { to: "/settings", icon: "fa-gear", label: "Settings", page: "settings" },

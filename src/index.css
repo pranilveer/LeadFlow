@@ -21,6 +21,7 @@
   --amber: #FF8027;
   --red: #F05D5D;
   --purple: #C084FC;
+  --gold: #F2C14E;
   --info: #1617FF;
   --canvas-bg: #1A1720;
   --nav: #24212C;
@@ -48,6 +49,7 @@
   --card-mauve: #726988;
   --card-orchid: #B17AB2;
   --card-violet: #6B46C1;
+  --card-gold: #C9A24B;
   --card-slate: #8C8795;
   --card-coral: #F0845D;
   --card-rose: #B48180;
@@ -71,6 +73,7 @@ body.light {
   --amber: #FF8027;
   --red: #F05D5D;
   --purple: #7C3AED;
+  --gold: #C8933A;
   --info: #1617FF;
   --canvas-bg: #F1EFF5;
   --nav: #24212C;
@@ -1007,7 +1010,7 @@ body.light ::-webkit-scrollbar-thumb:hover {
 /* ─── Stats grid ────────────────────────────────────────────────── */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -1051,6 +1054,7 @@ body.light ::-webkit-scrollbar-thumb:hover {
 .stat-card__icon--green { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green); }
 .stat-card__icon--amber { background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber); }
 .stat-card__icon--purple { background: color-mix(in srgb, var(--purple) 15%, transparent); color: var(--purple); }
+.stat-card__icon--gold { background: color-mix(in srgb, var(--gold) 15%, transparent); color: var(--gold); }
 
 .stat-card__info {
   display: flex;
@@ -2474,11 +2478,13 @@ body.modal-active { overflow: hidden; }
 .stat-card:nth-child(2) { background: var(--card-mauve); }
 .stat-card:nth-child(3) { background: var(--card-orchid); }
 .stat-card:nth-child(4) { background: var(--card-violet); }
+.stat-card:nth-child(5) { background: var(--card-gold); }
 .stat-card__icon,
 .stat-card__icon--blue,
 .stat-card__icon--green,
 .stat-card__icon--amber,
-.stat-card__icon--purple { background: rgba(255, 255, 255, 0.22); color: #fff; }
+.stat-card__icon--purple,
+.stat-card__icon--gold { background: rgba(255, 255, 255, 0.22); color: #fff; }
 .stat-card__label { color: rgba(255, 255, 255, 0.85); }
 .stat-card__value { color: #fff; }
 .stat-card__meta { color: rgba(255, 255, 255, 0.85); }
@@ -2576,7 +2582,7 @@ body.modal-active { overflow: hidden; }
     padding: 0.6rem 0.5rem;
   }
   .stats-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
   }
   .stat-card {

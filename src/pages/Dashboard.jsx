@@ -24,7 +24,7 @@ export default function Dashboard() {
 
   const [leads, setLeads] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [stats, setStats] = useState({ total: 0, today: 0, categories: 0, myLeads: 0 });
+  const [stats, setStats] = useState({ total: 0, today: 0, categories: 0, myLeads: 0, won: 0 });
   const [settings, setSettingsState] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -62,6 +62,7 @@ export default function Dashboard() {
   const todayStatRef = useRef(null);
   const catStatRef = useRef(null);
   const myStatRef = useRef(null);
+  const wonStatRef = useRef(null);
 
   const refresh = useCallback(() => setRenderKey(k => k + 1), []);
 
@@ -111,6 +112,7 @@ export default function Dashboard() {
     if (todayStatRef.current) animateCounter(todayStatRef.current, stats.today);
     if (catStatRef.current) animateCounter(catStatRef.current, stats.categories);
     if (myStatRef.current) animateCounter(myStatRef.current, stats.myLeads);
+    if (wonStatRef.current) animateCounter(wonStatRef.current, stats.won);
   }, [renderKey, stats]);
 
   useEffect(() => { setPage(1); }, [searchQuery, filterStatus, filterCategory, filterOwner, pageSize]);
@@ -362,6 +364,14 @@ export default function Dashboard() {
             <div className="stat-card__label">My Leads</div>
             <div className="stat-card__value" ref={myStatRef}>0</div>
             <div className="stat-card__meta">Assigned to you</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-card__icon stat-card__icon--gold"><i className="fa-solid fa-trophy"></i></div>
+          <div>
+            <div className="stat-card__label">Won Leads</div>
+            <div className="stat-card__value" ref={wonStatRef}>0</div>
+            <div className="stat-card__meta">Closed-won pipeline</div>
           </div>
         </div>
       </div>

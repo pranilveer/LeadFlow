@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import Join from "./pages/Join";
 import Dashboard from "./pages/Dashboard";
+import WonLeads from "./pages/WonLeads";
 import Categories from "./pages/Categories";
 import CategoryDetail from "./pages/CategoryDetail";
 import Users from "./pages/Users";
@@ -34,6 +35,7 @@ function AppRoutes() {
       <Route path="/join" element={<Join />} />
       <Route path="/join/:code" element={<Join />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/won" element={<ProtectedRoute><WonLeads /></ProtectedRoute>} />
       <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
       <Route path="/categories/:id" element={<ProtectedRoute><CategoryDetail /></ProtectedRoute>} />
       <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />

@@ -201,6 +201,14 @@ export async function importLeads(leads) {
   return request("POST", "/api/leads/import", { leads });
 }
 
+export async function getWonLeads() {
+  return request("GET", "/api/leads/won");
+}
+
+export async function removeFromWon(id) {
+  return request("DELETE", `/api/leads/won/${encodeURIComponent(id)}`);
+}
+
 export async function getCategories() {
   return request("GET", "/api/categories");
 }

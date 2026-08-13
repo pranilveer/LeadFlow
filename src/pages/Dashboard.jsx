@@ -18,7 +18,7 @@ import {
 } from "../utils/locationData";
 
 export default function Dashboard() {
-  const { session } = useAuth();
+  const { session, isAdmin } = useAuth();
   const { showToast } = useToast();
   const [renderKey, setRenderKey] = useState(0);
 
@@ -525,13 +525,15 @@ export default function Dashboard() {
                 value={filterCategory}
                 onChange={setFilterCategory}
               />
-              <FilterDropdown
-                label="All Owners"
-                icon="fa-solid fa-user"
-                options={[{ value: "", label: "All Owners" }, ...uniqueOwners.map(o => ({ value: o, label: o }))]}
-                value={filterOwner}
-                onChange={setFilterOwner}
-              />
+              {isAdmin && (
+                <FilterDropdown
+                  label="All Owners"
+                  icon="fa-solid fa-user"
+                  options={[{ value: "", label: "All Owners" }, ...uniqueOwners.map(o => ({ value: o, label: o }))]}
+                  value={filterOwner}
+                  onChange={setFilterOwner}
+                />
+              )}
               <FilterDropdown
                 label="Rows"
                 icon="fa-solid fa-list"

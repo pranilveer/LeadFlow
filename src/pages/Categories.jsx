@@ -9,6 +9,45 @@ import { getCategories, addCategory, updateCategory, deleteCategory, escapeHtml 
 
 const SWATCHES = ["#7AB2B2", "#726988", "#B17AB2", "#6B46C1", "#8C8795", "#F0845D", "#B48180", "#5B8DEF"];
 
+const CATEGORY_ICONS = [
+  { icon: "fa-folder-open", label: "General" },
+  { icon: "fa-store", label: "Shop" },
+  { icon: "fa-stethoscope", label: "Healthcare" },
+  { icon: "fa-tooth", label: "Dental" },
+  { icon: "fa-pen-ruler", label: "Design" },
+  { icon: "fa-laptop-code", label: "Software" },
+  { icon: "fa-utensils", label: "Restaurant" },
+  { icon: "fa-ice-cream", label: "Ice Cream" },
+  { icon: "fa-cake-candles", label: "Bakery" },
+  { icon: "fa-pizza-slice", label: "Pizza" },
+  { icon: "fa-cookie-bite", label: "Snacks" },
+  { icon: "fa-mug-hot", label: "Cafe" },
+  { icon: "fa-shirt", label: "Clothing" },
+  { icon: "fa-couch", label: "Furniture" },
+  { icon: "fa-camera", label: "Photography" },
+  { icon: "fa-flower", label: "Flowers" },
+  { icon: "fa-dumbbell", label: "Fitness" },
+  { icon: "fa-gift", label: "Gifts" },
+  { icon: "fa-pen", label: "Stationery" },
+  { icon: "fa-music", label: "Music / Dance" },
+  { icon: "fa-car", label: "Automotive" },
+  { icon: "fa-bed", label: "Hotel" },
+  { icon: "fa-shop", label: "Bazaar / Market" },
+  { icon: "fa-leaf", label: "Organic / Pan" },
+  { icon: "fa-house", label: "Real Estate" },
+  { icon: "fa-briefcase", label: "Business" },
+  { icon: "fa-graduation-cap", label: "Education" },
+  { icon: "fa-wrench", label: "Repairs" },
+  { icon: "fa-scissors", label: "Salon" },
+  { icon: "fa-paw", label: "Pets" },
+  { icon: "fa-seedling", label: "Garden" },
+  { icon: "fa-baby", label: "Kids" },
+  { icon: "fa-book", label: "Books" },
+  { icon: "fa-gamepad", label: "Gaming" },
+  { icon: "fa-phone", label: "Mobile / Tech" },
+  { icon: "fa-plane", label: "Travel" },
+];
+
 export default function Categories() {
   const { session, isAdmin } = useAuth();
   const { showToast } = useToast();
@@ -25,6 +64,7 @@ export default function Categories() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedColor, setSelectedColor] = useState("#F0845D");
+  const [selectedIcon, setSelectedIcon] = useState("fa-folder-open");
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const refresh = useCallback(() => setRenderKey(k => k + 1), []);
@@ -47,13 +87,13 @@ export default function Categories() {
 
   useEffect(() => { setPage(1); }, [searchQuery, filterLeads, pageSize]);
 
-  const openAdd = () => { setEditId(""); setName(""); setDescription(""); setSelectedColor("#F0845D"); setModalOpen(true); };
-  const openEdit = (cat) => { setEditId(cat._id || cat.id); setName(cat.name); setDescription(cat.description || ""); setSelectedColor(cat.color); setModalOpen(true); };
+  const openAdd = () => { setEditId(""); setName(""); setDescription(""); setSelectedColor("#F0845D"); setSelectedIcon("fa-folder-open"); setModalOpen(true); };
+  const openEdit = (cat) => { setEditId(cat._id || cat.id); setName(cat.name); setDescription(cat.description || ""); setSelectedColor(cat.color); setSelectedIcon(cat.icon || "fa-folder-open"); setModalOpen(true); };
 
   const save = async () => {
     if (!name.trim()) { showToast("Category name is required.", "error"); return; }
     try {
-      const data = { name: name.trim(), description: description.trim(), color: selectedColor };
+      const data = { name: name.trim(), description: description.trim(), color: selectedColor, icon: selectedIcon };
       if (editId) await updateCategory(editId, data);
       else await addCategory(data);
       showToast(editId ? "Category updated." : "Category created.", "success");
@@ -121,7 +161,12 @@ export default function Categories() {
             ) : pagedCategories.map(c => (
               <Link to={`/categories/${c._id || c.id}`} key={c._id || c.id} className="category-card" style={{ "--cat-color": c.color, textDecoration: "none", color: "inherit" }}>
                 <div className="category-card__header">
-                  <span className="category-card__name">{escapeHtml(c.name)}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", minWidth: 0 }}>
+                    <span className="category-card__icon" style={{ background: c.color + "1A", color: c.color }}>
+                      <i className={`fa-solid ${c.icon || "fa-folder-open"}`}></i>
+                    </span>
+                    <span className="category-card__name">{escapeHtml(c.name)}</span>
+                  </div>
                   <div style={{ display: "flex", gap: "0.35rem", flexShrink: 0 }}>
                     <span className="badge badge--neutral">{c.projectCount || 0} projects</span>
                     <span className="badge badge--neutral">{c.leadCount || 0} leads</span>
@@ -172,6 +217,16 @@ export default function Categories() {
           <div className="color-picker-row">
             {SWATCHES.map(color => (
               <button key={color} type="button" className={`color-swatch ${selectedColor === color ? "color-swatch--selected" : ""}`} style={{ background: color }} onClick={() => setSelectedColor(color)} aria-label={color}></button>
+            ))}
+          </div>
+        </div>
+        <div className="form-field">
+          <label className="form-label">Icon</label>
+          <div className="icon-picker-row">
+            {CATEGORY_ICONS.map(ic => (
+              <button key={ic.icon} type="button" title={ic.label} className={`icon-swatch ${selectedIcon === ic.icon ? "icon-swatch--selected" : ""}`} onClick={() => setSelectedIcon(ic.icon)} aria-label={ic.label}>
+                <i className={`fa-solid ${ic.icon}`}></i>
+              </button>
             ))}
           </div>
         </div>

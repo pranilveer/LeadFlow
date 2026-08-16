@@ -111,6 +111,7 @@ export default function CategoryDetail() {
             </Link>
             <span className="category-badge" style={{ background: category.color + "18", color: category.color, borderColor: category.color + "30", padding: "0.25rem 0.75rem" }}>
               <span className="category-badge__dot" style={{ background: category.color }}></span>
+              <i className={`fa-solid ${category.icon || "fa-folder-open"}`} style={{ fontSize: "0.7rem" }}></i>
               {escapeHtml(category.name)}
             </span>
             <span className="badge badge--neutral">{category.leadCount || 0} leads</span>

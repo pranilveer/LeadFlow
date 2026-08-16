@@ -627,7 +627,7 @@ export default function Dashboard() {
                 onClick={() => switchView("table")}
                 title="Table View"
               >
-                <i className="fa-solid fa-table-list"></i> Table
+                <i className="fa-solid fa-table-list"></i> <span className="view-toggle__label">Table</span>
               </button>
               <button
                 type="button"
@@ -635,7 +635,7 @@ export default function Dashboard() {
                 onClick={() => switchView("grid")}
                 title="Grid View"
               >
-                <i className="fa-solid fa-border-all"></i> Grid
+                <i className="fa-solid fa-border-all"></i> <span className="view-toggle__label">Grid</span>
               </button>
               <button
                 type="button"
@@ -643,7 +643,7 @@ export default function Dashboard() {
                 onClick={() => switchView("swimlane")}
                 title="Swimlane View"
               >
-                <i className="fa-solid fa-columns"></i> Swimlane
+                <i className="fa-solid fa-columns"></i> <span className="view-toggle__label">Swimlane</span>
               </button>
             </div>
           </div>

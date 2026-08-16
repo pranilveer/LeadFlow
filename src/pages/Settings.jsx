@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import {
   getSettings, saveSettings, getActivities, exportAllData, importAllData,
-  resetAllData, downloadFile, formatISODate, formatDisplayDateTime,
+  resetAllData, deleteOrganization, downloadFile, formatISODate, formatDisplayDateTime,
   escapeHtml, LEAD_STATUSES, LEAD_SOURCES
 } from "../utils/api";
 
@@ -18,13 +18,14 @@ const ACTIVITY_ICONS = {
 };
 
 export default function Settings() {
-  const { session, isAdmin } = useAuth();
+  const { session, isAdmin, isSuperAdmin, logout } = useAuth();
   const { showToast } = useToast();
   const [activeSection, setActiveSection] = useState("general");
   const [activityFilter, setActivityFilter] = useState("");
   const [activitySearch, setActivitySearch] = useState("");
   const [activities, setActivities] = useState([]);
   const [resetOpen, setResetOpen] = useState(false);
+  const [deleteOrgOpen, setDeleteOrgOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [generalForm, setGeneralForm] = useState({ companyName: "LeadFlow CRM", timezone: "Asia/Kolkata", leadsPerPage: 10, defaultLeadStatus: "New", defaultLeadSource: "Website" });
@@ -97,6 +98,16 @@ export default function Settings() {
       setGeneralForm({ companyName: s.companyName || "", timezone: s.timezone || "America/New_York", leadsPerPage: s.leadsPerPage || 10, defaultLeadStatus: s.defaultLeadStatus || "New", defaultLeadSource: s.defaultLeadSource || "Website" });
       setNotifForm({ emailNotifications: !!s.emailNotifications, desktopNotifications: !!s.desktopNotifications, autoBackup: !!s.autoBackup });
       showToast("Data reset to defaults.", "success");
+    } catch (err) { showToast(err.message, "error"); }
+  };
+
+  const handleDeleteOrg = async () => {
+    try {
+      await deleteOrganization();
+      setDeleteOrgOpen(false);
+      showToast("Organization deleted.", "success");
+      logout();
+      window.location.href = "/login";
     } catch (err) { showToast(err.message, "error"); }
   };
 
@@ -299,12 +310,39 @@ export default function Settings() {
         </div>
       )}
 
+      {isSuperAdmin && (
+        <section className="settings-section panel-card" style={{ marginTop: "1.5rem", borderColor: "var(--red)" }}>
+          <div className="panel-card__header">
+            <h2 className="panel-card__title"><i className="fa-solid fa-triangle-exclamation" style={{ color: "var(--red)" }}></i> Danger Zone</h2>
+          </div>
+          <div className="panel-card__body">
+            <p className="form-hint" style={{ marginBottom: "1rem" }}>
+              Super Admin exclusive &mdash; permanently deletes this workspace, all users, leads, categories, activities, and settings. This cannot be undone.
+            </p>
+            <button type="button" className="btn btn--danger" onClick={() => setDeleteOrgOpen(true)}>
+              <i className="fa-solid fa-trash"></i> Delete Organization
+            </button>
+          </div>
+        </section>
+      )}
+
       <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="Reset All Data" size="sm"
         footer={<>
           <button type="button" className="btn btn--ghost" onClick={() => setResetOpen(false)}>Cancel</button>
           <button type="button" className="btn btn--danger" onClick={handleReset}><i className="fa-solid fa-rotate-left"></i> Reset</button>
         </>}>
         <p>This will erase all leads, categories, activities, and settings &mdash; restoring factory defaults. Users and your session will be preserved. This cannot be undone.</p>
+      </Modal>
+
+      <Modal open={deleteOrgOpen} onClose={() => setDeleteOrgOpen(false)} title="Delete Organization" size="sm"
+        footer={<>
+          <button type="button" className="btn btn--ghost" onClick={() => setDeleteOrgOpen(false)}>Cancel</button>
+          <button type="button" className="btn btn--danger" onClick={handleDeleteOrg}><i className="fa-solid fa-trash"></i> Delete Forever</button>
+        </>}>
+        <p>
+          This will permanently delete <strong>{session?.organizationName || "your workspace"}</strong> and every user, lead, category, activity, and setting inside it. You will be signed out immediately.
+        </p>
+        <p style={{ marginTop: "0.5rem", color: "var(--red)", fontWeight: 600 }}>This action cannot be undone.</p>
       </Modal>
     </Layout>
   );

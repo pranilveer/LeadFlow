@@ -57,6 +57,11 @@ export default function Dashboard() {
 
   const [columnsOpen, setColumnsOpen] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState(() => defaultColumns(isAdmin));
+  const [viewMode, setViewMode] = useState(() => {
+    const saved = localStorage.getItem("leadflow_dashboard_view");
+    return ["table", "grid", "swimlane"].includes(saved) ? saved : "table";
+  });
+  const [dragLead, setDragLead] = useState(null);
 
   const [formOpen, setFormOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -343,6 +348,26 @@ export default function Dashboard() {
     else { setSortKey(key); setSortDir("asc"); }
   };
 
+  const switchView = (mode) => {
+    setViewMode(mode);
+    localStorage.setItem("leadflow_dashboard_view", mode);
+  };
+
+  const handleMoveStatus = async (lead, status) => {
+    if (lead.leadStatus === status) return;
+    setDragLead(null);
+    try {
+      await updateLead(lead.id, { leadStatus: status });
+      showToast(`${lead.leadName || "Lead"} moved to ${status}.`, "success");
+      refresh();
+    } catch (err) { showToast(err.message, "error"); }
+  };
+
+  const STATUS_DOT_COLORS = {
+    New: "var(--info)", Contacted: "var(--purple)", Qualified: "var(--accent)",
+    Proposal: "var(--amber)", Negotiation: "var(--amber)", Won: "var(--green)", Lost: "var(--red)",
+  };
+
   const sortIcon = (key) => {
     if (sortKey !== key) return "fa-sort";
     return sortDir === "asc" ? "fa-sort-up" : "fa-sort-down";
@@ -558,11 +583,8 @@ export default function Dashboard() {
         </div>
         <div className="panel-card__body" style={{ padding: 0 }}>
           <div className="table-toolbar dashboard-toolbar" style={{ padding: "1rem 1.35rem 0" }}>
-            <button type="button" className="btn btn--ghost btn--sm filters-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(o => !o)}>
-              <i className={`fa-solid ${filtersOpen ? "fa-xmark" : "fa-sliders"}`}></i> {filtersOpen ? "Hide Filters" : "Filters"}
-            </button>
-            <button type="button" className="btn btn--ghost btn--sm columns-toggle" onClick={openColumnsModal}>
-              <i className="fa-solid fa-table-columns"></i> Columns
+            <button type="button" className="btn btn--ghost btn--sm filters-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(o => !o)} title="Filters">
+              <i className={`fa-solid ${filtersOpen ? "fa-xmark" : "fa-sliders"}`}></i>
             </button>
             <div className={`filters-toggle__body ${filtersOpen ? "filters-toggle__body--open" : ""}`}>
               <div className="table-toolbar__search">
@@ -592,15 +614,40 @@ export default function Dashboard() {
                   onChange={setFilterOwner}
                 />
               )}
-              <FilterDropdown
-                label="Rows"
-                icon="fa-solid fa-list"
-                options={[{ value: "10", label: "10 / page" }, { value: "25", label: "25 / page" }, { value: "50", label: "50 / page" }]}
-                value={String(pageSize)}
-                onChange={(v) => setPageSize(Number(v))}
-              />
+            </div>
+            {viewMode === "table" && (
+              <button type="button" className="btn btn--ghost btn--sm columns-toggle" onClick={openColumnsModal} title="Manage Columns">
+                <i className="fa-solid fa-table-columns"></i>
+              </button>
+            )}
+            <div className="view-toggle">
+              <button
+                type="button"
+                className={`view-toggle__btn ${viewMode === "table" ? "view-toggle__btn--active" : ""}`}
+                onClick={() => switchView("table")}
+                title="Table View"
+              >
+                <i className="fa-solid fa-table-list"></i> Table
+              </button>
+              <button
+                type="button"
+                className={`view-toggle__btn ${viewMode === "grid" ? "view-toggle__btn--active" : ""}`}
+                onClick={() => switchView("grid")}
+                title="Grid View"
+              >
+                <i className="fa-solid fa-border-all"></i> Grid
+              </button>
+              <button
+                type="button"
+                className={`view-toggle__btn ${viewMode === "swimlane" ? "view-toggle__btn--active" : ""}`}
+                onClick={() => switchView("swimlane")}
+                title="Swimlane View"
+              >
+                <i className="fa-solid fa-columns"></i> Swimlane
+              </button>
             </div>
           </div>
+          {viewMode === "table" && (
           <div className="table-wrap leads-desktop-table" style={{ border: "none", borderRadius: 0 }}>
             <table className="data-table" aria-label="Leads data grid">
               <thead>
@@ -664,7 +711,10 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
-          <div className="leads-cards">
+          )}
+
+          {viewMode !== "swimlane" && (
+          <div className={`leads-cards ${viewMode === "grid" ? "leads-cards--grid" : ""}`}>
             {pagedLeads.length === 0 ? (
               <div className="table-empty"><i className="fa-solid fa-inbox"></i>No leads found. Add a lead or adjust your filters.</div>
             ) : pagedLeads.map(l => {
@@ -697,8 +747,81 @@ export default function Dashboard() {
               );
             })}
           </div>
+          )}
+
+          {viewMode === "swimlane" && (
+          <div className="swimlane-board">
+            {LEAD_STATUSES.map(status => {
+              const statusLeads = filteredLeads.filter(l => l.leadStatus === status);
+              return (
+                <div
+                  key={status}
+                  className="swimlane-column"
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={() => handleMoveStatus(dragLead, status)}
+                >
+                  <div className="swimlane-column__header">
+                    <span className="swimlane-column__dot" style={{ background: STATUS_DOT_COLORS[status] || "var(--text-faint)" }}></span>
+                    <span className="swimlane-column__title">{status}</span>
+                    <span className="swimlane-column__count">{statusLeads.length}</span>
+                  </div>
+                  <div className="swimlane-column__body">
+                    {statusLeads.length === 0 ? (
+                      <div className="swimlane-column__empty">Drop leads here</div>
+                    ) : statusLeads.map(l => {
+                      const catColor = categoryColor(l.category, categories);
+                      const catDisplay = l.category === "Other" && l.customCategory ? l.customCategory : l.category;
+                      return (
+                        <div
+                          key={l.id}
+                          className="swimlane-card"
+                          draggable
+                          onDragStart={() => setDragLead(l)}
+                          onDragEnd={() => setDragLead(null)}
+                        >
+                          <div className="swimlane-card__top">
+                            <div style={{ minWidth: 0 }}>
+                              <div className="swimlane-card__name">{l.leadName || "\u2014"}</div>
+                              <div className="swimlane-card__business">{l.businessName}</div>
+                            </div>
+                            <div className="swimlane-card__actions">
+                              <button type="button" title="View" onClick={() => setViewLead(l)}><i className="fa-solid fa-eye"></i></button>
+                              <button type="button" title="Edit" onClick={() => openEditForm(l)}><i className="fa-solid fa-pen"></i></button>
+                              <button type="button" title="Delete" onClick={() => setDeleteTarget(l)}><i className="fa-solid fa-trash"></i></button>
+                            </div>
+                          </div>
+                          <div className="swimlane-card__badges">
+                            <span className={`badge ${statusBadgeClass(l.leadStatus)}`}>{l.leadStatus}</span>
+                            <span className="category-badge" style={{ background: catColor + "18", color: catColor, borderColor: catColor + "30" }}><span className="category-badge__dot" style={{ background: catColor }}></span>{catDisplay}</span>
+                          </div>
+                          <div className="swimlane-card__meta">
+                            {l.email && <span><i className="fa-regular fa-envelope"></i>{l.email}</span>}
+                            {l.phone && <span><i className="fa-solid fa-phone"></i>{l.phone}</span>}
+                            {l.city && <span><i className="fa-solid fa-location-dot"></i>{l.city}{l.state ? `, ${l.state}` : ""}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          )}
+
+          {viewMode !== "swimlane" && (
           <div className="pagination">
-            <span>Showing {filteredLeads.length === 0 ? 0 : (effectivePage - 1) * pageSize + 1}{"\u2013"}{Math.min(effectivePage * pageSize, filteredLeads.length)} of {filteredLeads.length}</span>
+            <div className="pagination__info">
+              <span>Showing {totalPages === 1 ? `${filteredLeads.length} of ${filteredLeads.length}` : `${(effectivePage - 1) * pageSize + 1}{"\u2013"}${Math.min(effectivePage * pageSize, filteredLeads.length)} of ${filteredLeads.length}`}</span>
+              <FilterDropdown
+                className="pagination__rows"
+                label="Rows"
+                icon="fa-solid fa-list"
+                options={[{ value: "10", label: "10 / page" }, { value: "25", label: "25 / page" }, { value: "50", label: "50 / page" }]}
+                value={String(pageSize)}
+                onChange={(v) => setPageSize(Number(v))}
+              />
+            </div>
             <div className="pagination__controls">
               <button type="button" className="pagination__btn" disabled={effectivePage <= 1} onClick={() => setPage(p => p - 1)}><i className="fa-solid fa-chevron-left"></i></button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).filter(i => totalPages <= 7 || i <= 3 || i >= totalPages - 2 || Math.abs(i - effectivePage) <= 1).map((i, idx, arr) => {
@@ -710,6 +833,7 @@ export default function Dashboard() {
               <button type="button" className="pagination__btn" disabled={effectivePage >= totalPages} onClick={() => setPage(p => p + 1)}><i className="fa-solid fa-chevron-right"></i></button>
             </div>
           </div>
+          )}
         </div>
       </section>
 

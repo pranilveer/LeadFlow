@@ -1,7 +1,13 @@
+const SUPER_ADMIN_PERMS = [
+  "Promote & demote any role",
+  "Manage all admin accounts",
+  "Full workspace control",
+  "Delete the entire organization",
+];
+
 const ADMIN_PERMS = [
-  "Manage all users & roles",
+  "Manage users & categories",
   "Full access to every lead",
-  "Create & manage categories",
   "Backup & restore data",
   "View company-wide activity",
 ];
@@ -30,6 +36,24 @@ export default function Roles() {
           <article className="landing-role-card landing-role-card--admin reveal">
             <div className="landing-role-card__head">
               <span className="landing-role-card__icon" aria-hidden="true">
+                <i className="fa-solid fa-crown"></i>
+              </span>
+              <div>
+                <h3>Super Admin</h3>
+                <small>Exclusive role management</small>
+              </div>
+            </div>
+            <p>The workspace owner — the only role that can manage admins and roles.</p>
+            <ul className="landing-role-list" role="list">
+              {SUPER_ADMIN_PERMS.map((perm) => (
+                <li key={perm}><i className="fa-solid fa-circle-check" aria-hidden="true"></i>{perm}</li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="landing-role-card landing-role-card--user reveal" style={{ transitionDelay: "120ms" }}>
+            <div className="landing-role-card__head">
+              <span className="landing-role-card__icon" aria-hidden="true">
                 <i className="fa-solid fa-user-shield"></i>
               </span>
               <div>
@@ -37,7 +61,7 @@ export default function Roles() {
                 <small>Full workspace control</small>
               </div>
             </div>
-            <p>Admins own the workspace — from team access to data safety.</p>
+            <p>Admins run day-to-day operations — from team access to data safety.</p>
             <ul className="landing-role-list" role="list">
               {ADMIN_PERMS.map((perm) => (
                 <li key={perm}><i className="fa-solid fa-circle-check" aria-hidden="true"></i>{perm}</li>
@@ -45,7 +69,7 @@ export default function Roles() {
             </ul>
           </article>
 
-          <article className="landing-role-card landing-role-card--user reveal" style={{ transitionDelay: "120ms" }}>
+          <article className="landing-role-card landing-role-card--user reveal" style={{ transitionDelay: "240ms" }}>
             <div className="landing-role-card__head">
               <span className="landing-role-card__icon" aria-hidden="true">
                 <i className="fa-solid fa-user"></i>

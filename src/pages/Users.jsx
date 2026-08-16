@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import FilterDropdown from "../components/FilterDropdown";
@@ -6,9 +7,23 @@ import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { getUsers, addUser, updateUser, deleteUser, createInvite, escapeHtml } from "../utils/api";
 
+const ROLE_META = {
+  superadmin: { label: "Super Admin", icon: "fa-solid fa-crown" },
+  admin: { label: "Administrator", icon: "fa-solid fa-shield-halved" },
+  user: { label: "Team Member", icon: "fa-solid fa-user" },
+};
+
 export default function Users() {
-  const { session, isAdmin } = useAuth();
+  const { session, isAdmin, isSuperAdmin } = useAuth();
   const { showToast } = useToast();
+
+  const roleOptions = isSuperAdmin
+    ? [
+        { value: "user", label: "Team Member" },
+        { value: "admin", label: "Administrator" },
+        { value: "superadmin", label: "Super Admin" },
+      ]
+    : [{ value: "user", label: "Team Member" }];
   const [renderKey, setRenderKey] = useState(0);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,13 +74,13 @@ export default function Users() {
   const handleRoleChange = async (u, newRole) => {
     if (u.role === newRole) return;
     const userId = u._id || u.id;
-    if (userId === session.userId && newRole !== "admin") {
-      showToast("Cannot revoke your own administrator privileges.", "error");
+    if (!isSuperAdmin) {
+      showToast("Only the Super Admin can change roles.", "error");
       return;
     }
     try {
       await updateUser(userId, { role: newRole });
-      showToast(`Updated role for ${u.name} to ${newRole === "admin" ? "Administrator" : "Team Member"}.`, "success");
+      showToast(`Updated role for ${u.name} to ${(ROLE_META[newRole] || {}).label || newRole}.`, "success");
       refresh();
     } catch (err) {
       showToast(err.message, "error");
@@ -80,6 +95,7 @@ export default function Users() {
   });
 
   const totalUsers = users.length;
+  const superadminCount = users.filter(u => u.role === "superadmin").length;
   const adminCount = users.filter(u => u.role === "admin").length;
   const memberCount = users.filter(u => u.role === "user").length;
   const totalLeads = users.reduce((acc, u) => acc + (u.leadCount || 0), 0);
@@ -161,12 +177,14 @@ export default function Users() {
 
   const inviteLink = inviteCode ? `${window.location.origin}/join/${inviteCode}` : "";
 
+  if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
+
   return (
     <Layout activePage="users">
       <div className="page-header">
         <div>
           <h1 className="page-title">User Management</h1>
-          <p className="page-subtitle">Admin-only access to manage team members, permissions, and roles.</p>
+          <p className="page-subtitle">Manage team members and permissions. Only the Super Admin can change roles.</p>
         </div>
         <div className="page-header__actions">
           <button type="button" className="btn btn--secondary btn--sm" onClick={generateInvite} disabled={!isAdmin}>
@@ -177,13 +195,6 @@ export default function Users() {
           </button>
         </div>
       </div>
-
-      {!isAdmin && (
-        <div className="alert alert--error" style={{ marginBottom: "1.5rem" }}>
-          <i className="fa-solid fa-lock"></i>
-          <span>You do not have permission to access this page. Administrators only.</span>
-        </div>
-      )}
 
       {/* Stats Overview */}
       <div className="stats-grid" style={{ marginBottom: "1.5rem" }}>
@@ -249,6 +260,7 @@ export default function Users() {
             icon="fa-solid fa-shield-halved"
             options={[
               { value: "all", label: `All Roles (${totalUsers})` },
+              { value: "superadmin", label: `Super Admins (${superadminCount})` },
               { value: "admin", label: `Administrators (${adminCount})` },
               { value: "user", label: `Team Members (${memberCount})` },
             ]}
@@ -341,14 +353,11 @@ export default function Users() {
                       <FilterDropdown
                         className="filter-dropdown--toggle"
                         label="Role"
-                        icon={u.role === "admin" ? "fa-solid fa-crown" : "fa-solid fa-user"}
-                        options={[
-                          { value: "user", label: "Team Member" },
-                          { value: "admin", label: "Administrator" },
-                        ]}
+                        icon={(ROLE_META[u.role] || {}).icon || "fa-solid fa-user"}
+                        options={roleOptions}
                         value={u.role}
                         onChange={(val) => handleRoleChange(u, val)}
-                        disabled={isSelf || !isAdmin}
+                        disabled={isSelf || !isSuperAdmin}
                       />
                     </td>
                     <td style={{ textAlign: "right" }}>
@@ -356,7 +365,7 @@ export default function Users() {
                         <button type="button" className="btn btn--ghost btn--sm" onClick={() => openEdit(u)} title="Edit user details">
                           <i className="fa-solid fa-pen"></i> Edit
                         </button>
-                        {!isSelf ? (
+                        {!isSelf && (isSuperAdmin || u.role === "user") ? (
                           <button type="button" className="btn btn--ghost btn--sm" style={{ color: "var(--red)" }} onClick={() => setDeleteTarget(u)} title="Delete user">
                             <i className="fa-solid fa-trash"></i>
                           </button>
@@ -413,14 +422,11 @@ export default function Users() {
                   <div style={{ marginTop: "0.5rem", paddingTop: "0.5rem", borderTop: "1px dashed var(--border)" }}>
                     <FilterDropdown
                       label="Role"
-                      icon={u.role === "admin" ? "fa-solid fa-crown" : "fa-solid fa-user"}
-                      options={[
-                        { value: "user", label: "Team Member" },
-                        { value: "admin", label: "Administrator" },
-                      ]}
+                      icon={(ROLE_META[u.role] || {}).icon || "fa-solid fa-user"}
+                      options={roleOptions}
                       value={u.role}
                       onChange={(val) => handleRoleChange(u, val)}
-                      disabled={isSelf || !isAdmin}
+                      disabled={isSelf || !isSuperAdmin}
                     />
                   </div>
                 </div>
@@ -429,13 +435,13 @@ export default function Users() {
                   <button type="button" className="btn btn--ghost btn--sm" onClick={() => openEdit(u)}>
                     <i className="fa-solid fa-pen"></i> Edit User
                   </button>
-                  {!isSelf ? (
+                  {!isSelf && (isSuperAdmin || u.role === "user") ? (
                     <button type="button" className="btn btn--ghost btn--sm" style={{ color: "var(--red)" }} onClick={() => setDeleteTarget(u)}>
                       <i className="fa-solid fa-trash"></i> Delete
                     </button>
-                  ) : (
+                  ) : isSelf ? (
                     <span className="badge badge--neutral" style={{ fontSize: "0.7rem" }}>Current Account</span>
-                  )}
+                  ) : null}
                 </div>
               </article>
             );
@@ -503,10 +509,7 @@ export default function Users() {
             <FilterDropdown
               label="Select Role"
               icon="fa-solid fa-shield-halved"
-              options={[
-                { value: "user", label: "Team Member" },
-                { value: "admin", label: "Administrator" },
-              ]}
+              options={roleOptions}
               value={formData.role}
               onChange={(val) => setFormData({ ...formData, role: val })}
               disabled={editId && editId === session.userId}

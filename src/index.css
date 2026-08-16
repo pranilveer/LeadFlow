@@ -1526,6 +1526,74 @@ body.modal-active { overflow: hidden; }
 
 .detail-item__value { font-size: 0.875rem; color: var(--text); word-break: break-word; }
 
+/* ─── Column picker modal ───────────────────────────────────────── */
+.column-picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.85rem;
+  margin-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.column-picker__title {
+  font-size: 0.8125rem;
+  color: var(--text-dim);
+}
+
+.column-picker__header .checkbox__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.column-picker__list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.column-picker__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.column-picker__item:hover {
+  border-color: var(--accent);
+}
+
+.column-picker__item--checked {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.column-picker__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.column-picker__hint { margin-top: 0.85rem; }
+
+.column-picker__list::-webkit-scrollbar { width: 6px; }
+.column-picker__list::-webkit-scrollbar-track { background: transparent; }
+.column-picker__list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
 /* ─── Activity timeline ─────────────────────────────────────────── */
 .timeline { display: flex; flex-direction: column; gap: 0; }
 
@@ -1577,6 +1645,7 @@ body.modal-active { overflow: hidden; }
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .category-card {
@@ -2636,6 +2705,7 @@ body.modal-active { overflow: hidden; }
     width: 100%;
   }
   .filters-toggle { display: inline-flex; align-self: flex-start; }
+  .columns-toggle { align-self: flex-start; }
   .filters-toggle__body { display: none; }
   .filters-toggle__body--open { display: flex; flex-direction: column; align-items: stretch; gap: 0.75rem; width: 100%; }
 

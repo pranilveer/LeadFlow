@@ -122,7 +122,10 @@ export default function Categories() {
               <Link to={`/categories/${c._id || c.id}`} key={c._id || c.id} className="category-card" style={{ "--cat-color": c.color, textDecoration: "none", color: "inherit" }}>
                 <div className="category-card__header">
                   <span className="category-card__name">{escapeHtml(c.name)}</span>
-                  <span className="badge badge--neutral">{c.leadCount || 0} leads</span>
+                  <div style={{ display: "flex", gap: "0.35rem", flexShrink: 0 }}>
+                    <span className="badge badge--neutral">{c.projectCount || 0} projects</span>
+                    <span className="badge badge--neutral">{c.leadCount || 0} leads</span>
+                  </div>
                 </div>
                 <p className="category-card__desc">{escapeHtml(c.description || "No description.")}</p>
                 <div className="category-card__actions" onClick={e => e.stopPropagation()}>

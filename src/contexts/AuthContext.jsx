@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback } from "react";
-import { getSession, onboard as apiOnboard, login as apiLogin, register as apiRegister, logout as apiLogout, isAdmin as checkAdmin } from "../utils/api";
+import { getSession, onboard as apiOnboard, login as apiLogin, register as apiRegister, logout as apiLogout, isAdmin as checkAdmin, isSuperAdmin as checkSuperAdmin } from "../utils/api";
 
 const AuthContext = createContext(null);
 
@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, onboard, login, register, logout, refreshSession, isAdmin: checkAdmin(session) }}>
+    <AuthContext.Provider value={{ session, onboard, login, register, logout, refreshSession, isAdmin: checkAdmin(session), isSuperAdmin: checkSuperAdmin(session) }}>
       {children}
     </AuthContext.Provider>
   );

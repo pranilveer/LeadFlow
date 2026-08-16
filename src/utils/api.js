@@ -26,7 +26,11 @@ export function clearSessionData() {
 }
 
 export function isAdmin(session) {
-  return session && session.role === "admin";
+  return session && (session.role === "admin" || session.role === "superadmin");
+}
+
+export function isSuperAdmin(session) {
+  return session && session.role === "superadmin";
 }
 
 export function getColumnPrefs() {
@@ -292,6 +296,10 @@ export async function importAllData(payload) {
 
 export async function resetAllData() {
   return request("POST", "/api/backup/reset");
+}
+
+export async function deleteOrganization() {
+  return request("DELETE", "/api/org");
 }
 
 export async function createInvite() {

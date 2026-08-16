@@ -84,7 +84,7 @@ export default function Profile() {
           <div className="profile-card__avatar" style={{ background: user.avatarColor }}>{user.username.charAt(0).toUpperCase()}</div>
           <div className="profile-card__name">{user.name}</div>
           <div className="profile-card__title">{user.title || "\u2014"}</div>
-          <span className="badge badge--accent" style={{ marginTop: "0.5rem" }}>{user.role === "admin" ? "Administrator" : "Team Member"}</span>
+          <span className="badge badge--accent" style={{ marginTop: "0.5rem" }}>{user.role === "superadmin" ? "Super Admin" : user.role === "admin" ? "Administrator" : "Team Member"}</span>
           <div className="profile-card__stats">
             <div><div className="profile-stat__value" ref={leadCountRef}>0</div><div className="profile-stat__label">My Leads</div></div>
             <div><div className="profile-stat__value" ref={wonCountRef}>0</div><div className="profile-stat__label">Won</div></div>

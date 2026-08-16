@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 
 export default function Layout({ activePage, children }) {
-  const { session, logout, isAdmin } = useAuth();
+  const { session, logout, isAdmin, isSuperAdmin } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -38,10 +38,10 @@ export default function Layout({ activePage, children }) {
     { to: "/dashboard", icon: "fa-gauge-high", label: "Dashboard", page: "dashboard" },
     { to: "/won", icon: "fa-trophy", label: "Won Leads", page: "won", adminOnly: true },
     { to: "/categories", icon: "fa-tags", label: "Categories", page: "categories" },
-    { to: "/users", icon: "fa-users", label: "Users", page: "users", adminOnly: true },
+    { to: "/users", icon: "fa-users", label: "Users", page: "users", superAdminOnly: true },
     { to: "/settings", icon: "fa-gear", label: "Settings", page: "settings" },
     { to: "/profile", icon: "fa-user", label: "Profile", page: "profile" },
-  ].filter(item => !item.adminOnly || isAdmin);
+  ].filter(item => (!item.adminOnly || isAdmin) && (!item.superAdminOnly || isSuperAdmin));
 
   const handleLogout = () => {
     logout();
@@ -101,7 +101,7 @@ export default function Layout({ activePage, children }) {
                 <span className="user-avatar" style={{ background: session.avatarColor || "var(--accent)" }}>{initial}</span>
                 <span className="user-menu__info">
                   <span className="user-menu__name">{session.name || session.username}</span>
-                  <span className="user-menu__role">{isAdmin ? "Administrator" : "Team Member"}</span>
+                  <span className="user-menu__role">{session.role === "superadmin" ? "Super Admin" : isAdmin ? "Administrator" : "Team Member"}</span>
                 </span>
                 <i className="fa-solid fa-chevron-down" style={{ fontSize: "0.65rem", color: "var(--text-faint)" }}></i>
               </button>

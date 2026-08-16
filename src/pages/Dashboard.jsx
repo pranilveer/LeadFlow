@@ -4,6 +4,7 @@ import Modal from "../components/Modal";
 import FilterDropdown from "../components/FilterDropdown";
 import LocationCombobox from "../components/LocationCombobox";
 import RowActions from "../components/RowActions";
+import ColumnPickerModal from "../components/ColumnPickerModal";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import {
@@ -11,12 +12,27 @@ import {
   getCategories, importLeads, categoryColor, statusBadgeClass, escapeHtml,
   LEAD_STATUSES, LEAD_SOURCES, animateCounter, copyToClipboard,
   leadsToCSV, leadsToPDF, parseCSV, downloadFile, formatISODate,
-  getSettings, formatDisplayDateTime
+  getSettings, formatDisplayDateTime, getColumnPrefs, saveColumnPrefs
 } from "../utils/api";
 import {
   flagEmoji, getCountries, getStatesOfCountry, getCountryByName,
   getStateByCountryAndName, loadCities
 } from "../utils/locationData";
+
+const COLUMN_DEFS = [
+  { key: "id", label: "Lead ID", sortable: true },
+  { key: "leadName", label: "Name", sortable: true },
+  { key: "businessName", label: "Business", sortable: true },
+  { key: "email", label: "Email" },
+  { key: "phone", label: "Phone" },
+  { key: "category", label: "Category", sortable: true },
+  { key: "leadStatus", label: "Status", sortable: true },
+  { key: "leadSource", label: "Source" },
+  { key: "addedBy", label: "Added By", adminOnly: true, sortable: true },
+  { key: "addedDate", label: "Date", sortable: true },
+];
+
+const defaultColumns = (isAdmin) => COLUMN_DEFS.filter(c => !c.adminOnly || isAdmin).map(c => c.key);
 
 export default function Dashboard() {
   const { session, isAdmin } = useAuth();
@@ -38,6 +54,9 @@ export default function Dashboard() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sortKey, setSortKey] = useState("addedDate");
   const [sortDir, setSortDir] = useState("desc");
+
+  const [columnsOpen, setColumnsOpen] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState(() => defaultColumns(isAdmin));
 
   const [formOpen, setFormOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -84,6 +103,41 @@ export default function Dashboard() {
   }, [showToast]);
 
   useEffect(() => { loadData(); }, [loadData, renderKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const prefs = await getColumnPrefs();
+        if (cancelled) return;
+        const defaults = defaultColumns(isAdmin);
+        const saved = prefs?.columns;
+        if (Array.isArray(saved) && saved.length > 0) {
+          const valid = saved.filter(k => defaults.includes(k));
+          if (valid.length > 0) setVisibleColumns(valid);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [isAdmin]);
+
+  const columnOptions = useMemo(
+    () => COLUMN_DEFS.filter(c => !c.adminOnly || isAdmin),
+    [isAdmin]
+  );
+
+  const openColumnsModal = () => setColumnsOpen(true);
+
+  const applyColumns = async (keys) => {
+    try {
+      await saveColumnPrefs("columns", keys);
+      setVisibleColumns(keys);
+      setColumnsOpen(false);
+      showToast("Table columns updated.", "success");
+    } catch (err) {
+      showToast(err.message || "Failed to save column preferences.", "error");
+    }
+  };
 
   const today = formatISODate(new Date());
 
@@ -507,6 +561,9 @@ export default function Dashboard() {
             <button type="button" className="btn btn--ghost btn--sm filters-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(o => !o)}>
               <i className={`fa-solid ${filtersOpen ? "fa-xmark" : "fa-sliders"}`}></i> {filtersOpen ? "Hide Filters" : "Filters"}
             </button>
+            <button type="button" className="btn btn--ghost btn--sm columns-toggle" onClick={openColumnsModal}>
+              <i className="fa-solid fa-table-columns"></i> Columns
+            </button>
             <div className={`filters-toggle__body ${filtersOpen ? "filters-toggle__body--open" : ""}`}>
               <div className="table-toolbar__search">
                 <i className="fa-solid fa-magnifying-glass"></i>
@@ -548,37 +605,52 @@ export default function Dashboard() {
             <table className="data-table" aria-label="Leads data grid">
               <thead>
                 <tr>
-                  <th onClick={() => handleSort("id")} className={sortKey === "id" ? "sorted" : ""}>Lead ID <i className={`fa-solid sort-icon ${sortIcon("id")}`}></i></th>
-                  <th onClick={() => handleSort("leadName")} className={sortKey === "leadName" ? "sorted" : ""}>Name <i className={`fa-solid sort-icon ${sortIcon("leadName")}`}></i></th>
-                  <th onClick={() => handleSort("businessName")} className={sortKey === "businessName" ? "sorted" : ""}>Business <i className={`fa-solid sort-icon ${sortIcon("businessName")}`}></i></th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th onClick={() => handleSort("category")} className={sortKey === "category" ? "sorted" : ""}>Category <i className={`fa-solid sort-icon ${sortIcon("category")}`}></i></th>
-                  <th onClick={() => handleSort("leadStatus")} className={sortKey === "leadStatus" ? "sorted" : ""}>Status <i className={`fa-solid sort-icon ${sortIcon("leadStatus")}`}></i></th>
-                  <th>Source</th>
-                  {isAdmin && <th>Added By</th>}
-                  <th onClick={() => handleSort("addedDate")} className={sortKey === "addedDate" ? "sorted" : ""}>Date <i className={`fa-solid sort-icon ${sortIcon("addedDate")}`}></i></th>
+                  {visibleColumns.map(key => {
+                    const def = COLUMN_DEFS.find(c => c.key === key);
+                    if (!def) return null;
+                    return (
+                      <th key={key} onClick={def.sortable ? () => handleSort(key) : undefined} className={def.sortable && sortKey === key ? "sorted" : ""}>
+                        {def.label} {def.sortable && <i className={`fa-solid sort-icon ${sortIcon(key)}`}></i>}
+                      </th>
+                    );
+                  })}
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {pagedLeads.length === 0 ? (
-                  <tr><td colSpan="11" className="table-empty"><i className="fa-solid fa-inbox"></i>No leads found. Add a lead or adjust your filters.</td></tr>
+                  <tr><td colSpan={visibleColumns.length + 1} className="table-empty"><i className="fa-solid fa-inbox"></i>No leads found. Add a lead or adjust your filters.</td></tr>
                 ) : pagedLeads.map(l => {
                   const catColor = categoryColor(l.category, categories);
                   const catDisplay = l.category === "Other" && l.customCategory ? l.customCategory : l.category;
                   return (
                     <tr key={l.id}>
-                      <td className="cell-mono">{l.id}</td>
-                      <td className="cell-primary">{l.leadName}</td>
-                      <td>{l.businessName}</td>
-                      <td><button type="button" className="copy-btn" onClick={() => handleCopy(l.email)} title="Copy email">{l.email} <i className="fa-regular fa-copy"></i></button></td>
-                      <td>{l.phone ? <button type="button" className="copy-btn" onClick={() => handleCopy(l.phone)} title="Copy phone">{l.phone} <i className="fa-regular fa-copy"></i></button> : "\u2014"}</td>
-                      <td><span className="category-badge" style={{ background: catColor + "18", color: catColor, borderColor: catColor + "30" }}><span className="category-badge__dot" style={{ background: catColor }}></span>{catDisplay}</span></td>
-                      <td><span className={`badge ${statusBadgeClass(l.leadStatus)}`}>{l.leadStatus}</span></td>
-                      <td>{l.leadSource}</td>
-                      {isAdmin && <td>{l.addedBy}</td>}
-                      <td>{l.addedDate}</td>
+                      {visibleColumns.map(key => {
+                        switch (key) {
+                          case "id":
+                            return <td key={key} className="cell-mono">{l.id}</td>;
+                          case "leadName":
+                            return <td key={key} className="cell-primary">{l.leadName}</td>;
+                          case "businessName":
+                            return <td key={key}>{l.businessName}</td>;
+                          case "email":
+                            return <td key={key}><button type="button" className="copy-btn" onClick={() => handleCopy(l.email)} title="Copy email">{l.email} <i className="fa-regular fa-copy"></i></button></td>;
+                          case "phone":
+                            return <td key={key}>{l.phone ? <button type="button" className="copy-btn" onClick={() => handleCopy(l.phone)} title="Copy phone">{l.phone} <i className="fa-regular fa-copy"></i></button> : "\u2014"}</td>;
+                          case "category":
+                            return <td key={key}><span className="category-badge" style={{ background: catColor + "18", color: catColor, borderColor: catColor + "30" }}><span className="category-badge__dot" style={{ background: catColor }}></span>{catDisplay}</span></td>;
+                          case "leadStatus":
+                            return <td key={key}><span className={`badge ${statusBadgeClass(l.leadStatus)}`}>{l.leadStatus}</span></td>;
+                          case "leadSource":
+                            return <td key={key}>{l.leadSource}</td>;
+                          case "addedBy":
+                            return <td key={key}>{l.addedBy}</td>;
+                          case "addedDate":
+                            return <td key={key}>{l.addedDate}</td>;
+                          default:
+                            return null;
+                        }
+                      })}
                       <td><div className="table-actions">
                         <RowActions items={[
                           { icon: "fa-eye", label: "View", onClick: () => setViewLead(l) },
@@ -640,6 +712,15 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
+
+      <ColumnPickerModal
+        open={columnsOpen}
+        title="Customize Columns"
+        columns={columnOptions}
+        initial={visibleColumns}
+        onApply={applyColumns}
+        onClose={() => setColumnsOpen(false)}
+      />
 
       <Modal open={!!viewLead} onClose={() => setViewLead(null)} title={viewLead ? `${viewLead.leadName} \u2014 ${viewLead.businessName}` : "Lead Details"} size="lg"
         footer={<>

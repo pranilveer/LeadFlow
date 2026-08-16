@@ -29,6 +29,14 @@ export function isAdmin(session) {
   return session && session.role === "admin";
 }
 
+export function getColumnPrefs() {
+  return request("GET", "/api/preferences");
+}
+
+export function saveColumnPrefs(key, columns) {
+  return request("PUT", "/api/preferences", { [key]: columns });
+}
+
 function friendlyError(msg) {
   if (!msg) return "Something went wrong. Please try again.";
   if (/buffering timed out|timeout|ECONNRESET|ECONNREFUSED|ETIMEDOUT/i.test(msg)) return "Server is not responding. Please try again later.";

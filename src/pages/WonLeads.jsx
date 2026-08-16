@@ -4,12 +4,29 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import FilterDropdown from "../components/FilterDropdown";
 import RowActions from "../components/RowActions";
+import ColumnPickerModal from "../components/ColumnPickerModal";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import {
   getWonLeads, removeFromWon, getCategories,
-  categoryColor, statusBadgeClass, copyToClipboard, LEAD_STATUSES
+  categoryColor, statusBadgeClass, copyToClipboard, LEAD_STATUSES,
+  getColumnPrefs, saveColumnPrefs
 } from "../utils/api";
+
+const WON_COLUMN_DEFS = [
+  { key: "id", label: "Lead ID" },
+  { key: "leadName", label: "Name" },
+  { key: "businessName", label: "Business" },
+  { key: "email", label: "Email" },
+  { key: "phone", label: "Phone" },
+  { key: "category", label: "Category" },
+  { key: "leadStatus", label: "Current Status" },
+  { key: "leadSource", label: "Source" },
+  { key: "addedBy", label: "Added By" },
+  { key: "addedDate", label: "Date" },
+];
+
+const WON_DEFAULT_COLUMNS = WON_COLUMN_DEFS.map(c => c.key);
 
 export default function WonLeads() {
   const { isAdmin } = useAuth();
@@ -24,6 +41,8 @@ export default function WonLeads() {
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [columnsOpen, setColumnsOpen] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState(WON_DEFAULT_COLUMNS);
   const [viewLead, setViewLead] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
   const [removing, setRemoving] = useState(false);
@@ -42,7 +61,36 @@ export default function WonLeads() {
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const prefs = await getColumnPrefs();
+        if (cancelled) return;
+        const saved = prefs?.wonColumns;
+        if (Array.isArray(saved) && saved.length > 0) {
+          const valid = saved.filter(k => WON_DEFAULT_COLUMNS.includes(k));
+          if (valid.length > 0) setVisibleColumns(valid);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   useEffect(() => { setPage(1); }, [searchQuery, filterStatus, filterCategory, filterOwner, pageSize]);
+
+  const openColumnsModal = () => setColumnsOpen(true);
+
+  const applyColumns = async (keys) => {
+    try {
+      await saveColumnPrefs("wonColumns", keys);
+      setVisibleColumns(keys);
+      setColumnsOpen(false);
+      showToast("Table columns updated.", "success");
+    } catch (err) {
+      showToast(err.message || "Failed to save column preferences.", "error");
+    }
+  };
 
   if (!isAdmin) return <Navigate to="/dashboard" replace />;
 
@@ -109,6 +157,9 @@ export default function WonLeads() {
             <button type="button" className="btn btn--ghost btn--sm filters-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(o => !o)}>
               <i className={`fa-solid ${filtersOpen ? "fa-xmark" : "fa-sliders"}`}></i> {filtersOpen ? "Hide Filters" : "Filters"}
             </button>
+            <button type="button" className="btn btn--ghost btn--sm columns-toggle" onClick={openColumnsModal}>
+              <i className="fa-solid fa-table-columns"></i> Columns
+            </button>
             <div className={`filters-toggle__body ${filtersOpen ? "filters-toggle__body--open" : ""}`}>
               <div className="table-toolbar__search">
                 <i className="fa-solid fa-magnifying-glass"></i>
@@ -148,37 +199,48 @@ export default function WonLeads() {
             <table className="data-table" aria-label="Won leads data grid">
               <thead>
                 <tr>
-                  <th>Lead ID</th>
-                  <th>Name</th>
-                  <th>Business</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Category</th>
-                  <th>Current Status</th>
-                  <th>Source</th>
-                  <th>Added By</th>
-                  <th>Date</th>
+                  {visibleColumns.map(key => {
+                    const def = WON_COLUMN_DEFS.find(c => c.key === key);
+                    if (!def) return null;
+                    return <th key={key}>{def.label}</th>;
+                  })}
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {pagedLeads.length === 0 ? (
-                  <tr><td colSpan="11" className="table-empty"><i className="fa-solid fa-trophy"></i>No won leads found. Mark a lead as Won to add it here, or adjust your filters.</td></tr>
+                  <tr><td colSpan={visibleColumns.length + 1} className="table-empty"><i className="fa-solid fa-trophy"></i>No won leads found. Mark a lead as Won to add it here, or adjust your filters.</td></tr>
                 ) : pagedLeads.map(l => {
                   const catColor = categoryColor(l.category, categories);
                   const catDisplay = l.category === "Other" && l.customCategory ? l.customCategory : l.category;
                   return (
                     <tr key={l.id}>
-                      <td className="cell-mono">{l.id}</td>
-                      <td className="cell-primary">{l.leadName}</td>
-                      <td>{l.businessName}</td>
-                      <td><button type="button" className="copy-btn" onClick={() => handleCopy(l.email)} title="Copy email">{l.email} <i className="fa-regular fa-copy"></i></button></td>
-                      <td>{l.phone ? <button type="button" className="copy-btn" onClick={() => handleCopy(l.phone)} title="Copy phone">{l.phone} <i className="fa-regular fa-copy"></i></button> : "\u2014"}</td>
-                      <td><span className="category-badge" style={{ background: catColor + "18", color: catColor, borderColor: catColor + "30" }}><span className="category-badge__dot" style={{ background: catColor }}></span>{catDisplay}</span></td>
-                      <td><span className={`badge ${statusBadgeClass(l.leadStatus)}`}>{l.leadStatus}</span></td>
-                      <td>{l.leadSource}</td>
-                      <td>{l.addedBy}</td>
-                      <td>{l.addedDate}</td>
+                      {visibleColumns.map(key => {
+                        switch (key) {
+                          case "id":
+                            return <td key={key} className="cell-mono">{l.id}</td>;
+                          case "leadName":
+                            return <td key={key} className="cell-primary">{l.leadName}</td>;
+                          case "businessName":
+                            return <td key={key}>{l.businessName}</td>;
+                          case "email":
+                            return <td key={key}><button type="button" className="copy-btn" onClick={() => handleCopy(l.email)} title="Copy email">{l.email} <i className="fa-regular fa-copy"></i></button></td>;
+                          case "phone":
+                            return <td key={key}>{l.phone ? <button type="button" className="copy-btn" onClick={() => handleCopy(l.phone)} title="Copy phone">{l.phone} <i className="fa-regular fa-copy"></i></button> : "\u2014"}</td>;
+                          case "category":
+                            return <td key={key}><span className="category-badge" style={{ background: catColor + "18", color: catColor, borderColor: catColor + "30" }}><span className="category-badge__dot" style={{ background: catColor }}></span>{catDisplay}</span></td>;
+                          case "leadStatus":
+                            return <td key={key}><span className={`badge ${statusBadgeClass(l.leadStatus)}`}>{l.leadStatus}</span></td>;
+                          case "leadSource":
+                            return <td key={key}>{l.leadSource}</td>;
+                          case "addedBy":
+                            return <td key={key}>{l.addedBy}</td>;
+                          case "addedDate":
+                            return <td key={key}>{l.addedDate}</td>;
+                          default:
+                            return null;
+                        }
+                      })}
                       <td><div className="table-actions">
                         <RowActions items={[
                           { icon: "fa-eye", label: "View", onClick: () => setViewLead(l) },
@@ -274,6 +336,15 @@ export default function WonLeads() {
         </>}>
         <p>Remove <strong>{removeTarget?.leadName}</strong> from the Won Leads page? The lead will remain in the Dashboard with its current status.</p>
       </Modal>
+
+      <ColumnPickerModal
+        open={columnsOpen}
+        title="Customize Columns"
+        columns={WON_COLUMN_DEFS}
+        initial={visibleColumns}
+        onApply={applyColumns}
+        onClose={() => setColumnsOpen(false)}
+      />
     </Layout>
   );
 }
